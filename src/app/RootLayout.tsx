@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { isLang, initI18n, DEFAULT_LANG } from '@/i18n'
 import { TopBar } from '@/components/ui/TopBar'
 import { Footer } from '@/components/ui/Footer'
+import { FloatingVisitButton } from '@/components/ui/FloatingVisitButton'
 
 export function RootLayout() {
   const { lang } = useParams<{ lang?: string }>()
@@ -23,6 +24,7 @@ export function RootLayout() {
         <Outlet context={{ lang: current }} />
       </main>
       <Footer lang={current} />
+      <FloatingVisitButton />
     </div>
   )
 }

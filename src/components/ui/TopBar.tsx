@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { GitBranch, ExternalLink, LogOut, Menu, ShieldCheck, X } from 'lucide-react'
+import { GitBranch, LogOut, Menu, ShieldCheck, X } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 import { SearchBox } from '@/components/ui/SearchBox'
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
@@ -12,7 +12,6 @@ import { clearRestrictedCache } from '@/lib/restricted'
 import type { Lang } from '@/i18n'
 
 const GITHUB_URL = 'https://github.com/apox-rider/sokoplus-docs'
-const SITE_URL = 'https://sokopluss.co.tz'
 
 export function TopBar({ lang }: { lang: Lang }) {
   const { t } = useTranslation('nav')
@@ -34,7 +33,7 @@ export function TopBar({ lang }: { lang: Lang }) {
   const links = [
     { to: `/${lang}`, label: t('home'), end: true },
     { to: `/${lang}/help`, label: t('helpCentre'), end: false },
-    { to: `/${lang}/developers`, label: t('developers'), end: false },
+    // { to: `/${lang}/developers`, label: t('developers'), end: false }, // developers section under development
   ]
 
   return (
@@ -76,7 +75,7 @@ export function TopBar({ lang }: { lang: Lang }) {
             <GitBranch className="h-4 w-4" />
           </a>
           <LanguageSwitcher />
-          {session ? (
+          {session && (
             <>
               {session.role === 'superAdmin' && (
                 <NavLink
@@ -104,16 +103,6 @@ export function TopBar({ lang }: { lang: Lang }) {
                 <LogOut className="h-4 w-4" />
               </button>
             </>
-          ) : (
-            <a
-              href={SITE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-on-surface-variant transition-colors hover:text-on-surface"
-            >
-              {t('visitSite')}
-              <ExternalLink className="h-3.5 w-3.5" />
-            </a>
           )}
           <button
             type="button"
@@ -149,7 +138,7 @@ export function TopBar({ lang }: { lang: Lang }) {
                 {l.label}
               </NavLink>
             ))}
-            {session ? (
+            {session && (
               <>
                 {session.role === 'superAdmin' && (
                   <NavLink
@@ -173,17 +162,6 @@ export function TopBar({ lang }: { lang: Lang }) {
                   {t('signOut')}
                 </button>
               </>
-            ) : (
-              <a
-                href={SITE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface-container"
-              >
-                {t('visitSite')}
-                <ExternalLink className="h-4 w-4" />
-              </a>
             )}
             <a
               href={GITHUB_URL}

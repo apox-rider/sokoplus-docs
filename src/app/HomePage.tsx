@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import {
   ArrowRight,
   BookOpen,
-  Code2,
+  // Code2, // developers section under development
   Globe2,
   Languages,
   MapPin,
@@ -17,7 +17,7 @@ export function HomePage() {
   const lang: Lang = isLang(langParam) ? langParam : DEFAULT_LANG
   const { t } = useTranslation(['landing', 'common', 'nav'])
   const helpNs = useTranslation('help')
-  const devNs = useTranslation('developers')
+  // const devNs = useTranslation('developers') // developers section under development
 
   usePageMeta({
     title: 'SokoPlus Docs & Help Centre',
@@ -31,7 +31,7 @@ export function HomePage() {
   })
 
   const helpArticles = getArticles({ section: 'help', lang }).slice(0, 4)
-  const devArticles = getArticles({ section: 'developers', lang }).slice(0, 3)
+  // const devArticles = getArticles({ section: 'developers', lang }).slice(0, 3) // developers section under development
 
   return (
     <div className="mx-auto max-w-[1440px] px-4 lg:px-8">
@@ -60,6 +60,7 @@ export function HomePage() {
               {t('landing:ctaHelp')}
               <ArrowRight className="h-4 w-4" />
             </Link>
+            {/* Developers CTA — hidden while under development
             <Link
               to={`/${lang}/developers`}
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-line-strong px-6 py-3 text-base font-semibold text-on-surface transition-colors hover:border-brand hover:text-brand focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:outline-none"
@@ -67,6 +68,7 @@ export function HomePage() {
               <Code2 className="h-4 w-4" />
               {t('landing:ctaDevelopers')}
             </Link>
+            */}
           </div>
 
           <div className="mt-12 grid grid-cols-3 gap-3 sm:gap-4">
@@ -105,6 +107,7 @@ export function HomePage() {
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </span>
         </Link>
+        {/* Developers section card — hidden while under development
         <Link
           to={`/${lang}/developers`}
           className="glass-card glass-card-hover group p-8"
@@ -119,6 +122,7 @@ export function HomePage() {
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </span>
         </Link>
+        */}
       </section>
 
       {/* Popular topics */}
@@ -144,6 +148,7 @@ export function HomePage() {
             </Link>
           ))}
         </div>
+        {/* Developers popular topics — hidden while under development
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {devArticles.map((a) => (
             <Link
@@ -163,6 +168,7 @@ export function HomePage() {
             </Link>
           ))}
         </div>
+        */}
       </section>
 
       {/* Mission */}

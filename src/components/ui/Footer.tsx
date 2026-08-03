@@ -30,11 +30,13 @@ export function Footer({ lang }: { lang: Lang }) {
                 {t('helpCentre')}
               </Link>
             </li>
+            {/* Developers link — hidden while under development
             <li>
               <Link to={`/${lang}/developers`} className="hover:text-brand">
                 {t('developers')}
               </Link>
             </li>
+            */}
           </ul>
         </div>
 
