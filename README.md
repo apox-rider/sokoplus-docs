@@ -1,0 +1,139 @@
+# SokoPlus Docs & Help Centre
+
+Official documentation and help centre for the [SokoPlus](https://sokopluss.co.tz) platform. Bilingual (English + Swahili) static docs for buyers, vendors, service providers and delivery partners, plus a full developer API reference.
+
+## Overview
+
+- **Help Centre** (`/en/help`, `/sw/help`) — 28 guides per language covering account setup, ordering, payments, delivery, escrow, trust & safety and FAQ.
+- **Developer docs** (`/en/developers`, `/sw/developers`) — 19 pages per language covering the REST API, authentication, payments/webhooks, data model and deployment.
+- **Restricted developer docs** — a small set of admin/internal pages (`api-admin`, `deployment`, `environment-variables`, `roles-permissions`) that are served from the backend database and gated behind a token or super-admin login.
+
+## Tech Stack
+
+| Area | Choice |
+|------|--------|
+| Framework | React 19 + Vite 8 (SPA) |
+| Routing | React Router v7 |
+| Styling | Tailwind CSS v4 (`@tailwindcss/vite`) |
+| Content | MDX (frontmatter via `gray-matter`) rendered with `react-markdown` + custom MDX components |
+| Syntax highlighting | Shiki (`@shikijs/rehype`, `github-light` theme) |
+| i18n | i18next + react-i18next (EN / SW) |
+| Search | Fuse.js against a build-time generated JSON index |
+| Language | TypeScript (strict) |
+| Package manager | pnpm |
+
+## Getting Started
+
+```bash
+# install dependencies
+pnpm install
+
+# start the dev server (http://localhost:3001)
+pnpm dev
+```
+
+In development, Vite proxies `/api/docs` to a local backend at `http://localhost:5001` (see `vite.config.ts`).
+
+### Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start dev server on port 3001 |
+| `pnpm build` | Type-check + production build to `dist/` |
+| `pnpm preview` | Preview the production build |
+| `pnpm lint` | Run ESLint |
+| `pnpm check` | Run TypeScript type-check (`tsc --noEmit`) |
+| `pnpm format` | Format the repo with Prettier |
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_DOCS_API_URL` | Base URL of the SokoPlus backend docs API (`/auth/*`, `/tokens`, `/articles`). | `/api/docs` (proxied in dev) |
+
+Copy `.env.example` to `.env.local` and adjust as needed. Example for production:
+
+```
+VITE_DOCS_API_URL=https://sokoplus-backend.onrender.com/api/docs
+```
+
+## Project Structure
+
+```
+src/
+  app/            # Route pages (Home, Docs, Article, Section, Login, Redeem, Admin, Restricted)
+  components/
+    mdx/          # MDX rendering + custom components (Callout, Tabs, CodeBlock, Badge, Kbd)
+    ui/           # TopBar, Sidebar, SearchBox, Footer, LanguageSwitcher, AuthGate, Logo, Button
+  content/
+    en/           # English MDX content (help/ + developers/)
+    sw/           # Swahili MDX content (help/ + developers/)
+  i18n/           # i18next init + locale JSON resources (en/, sw/)
+  lib/            # content registry, nav, search, SEO, docs API client, session/auth helpers
+  main.tsx        # App entry
+  router.tsx      # Route definitions
+  styles.css      # Global styles / Tailwind entry
+plugins/
+  docs-static.mjs # Vite plugin: builds search-index.{en,sw}.json + sitemap.xml at build time
+public/           # Static assets (favicon, icons, manifest, robots.txt, generated indexes)
+```
+
+## Content Authoring
+
+Docs live in `src/content/<lang>/<section>/<slug>.mdx` as MDX with YAML frontmatter.
+
+```yaml
+---
+title: Introduction
+description: An overview of the SokoPlus platform API.
+group: overview
+order: 1
+updated: 2026-08-03
+---
+```
+
+- **`title`** (required) — heading shown in the sidebar, index and article header.
+- **`description`** — summary used on cards, search results and SEO meta.
+- **`group`** — sidebar/section group. Groups are defined per section in `src/lib/nav.ts` (`SECTION_GROUPS`).
+- **`order`** — sort position within a group (ascending, then alphabetical).
+- **`updated`** — "last updated" date shown on the article page.
+
+Custom MDX components available in articles: `<Callout type="note|tip|warning|danger">`, `<Tabs>`/`<Tab label>`, `<CodeBlock title>`, `<Badge color>`, `<Kbd>`. See `src/components/mdx/MdxComponents.tsx`.
+
+Every article should have a matching file in both `en` and `sw`. Navigation labels and UI strings are translated in `src/i18n/locales/{en,sw}/*.json`.
+
+## Build-Time Generated Files
+
+A custom Vite plugin (`plugins/docs-static.mjs`) runs on `closeBundle` and writes into `public/`:
+
+- `search-index.{en,sw}.json` — Fuse.js search index generated from MDX frontmatter + plain-text content.
+- `sitemap.xml` — sitemap for `https://docs.sokopluss.co.tz`.
+
+## Restricted Docs & Token Auth
+
+Four developer pages are not part of the static build. They are fetched at runtime from the backend (`VITE_DOCS_API_URL`), where the content is stored in the database (`src/lib/restricted.ts` lists the slugs).
+
+- **Redeem a token** at `/<lang>/redeem` (e.g. a link generated by an admin). A valid token grants an `admin` session.
+- **Super-admin login** at `/login` grants a `superAdmin` session.
+- Sessions are stored in `localStorage` (`docs.session`), expiry-checked on read.
+- `/admin/tokens` (super-admin only) can create, copy/share, list and revoke access tokens with a configurable TTL (5–60 min).
+- The sidebar only shows restricted articles a logged-in user is allowed to see; `superAdmin`-only articles are hidden from plain `admin` sessions.
+
+## Deployment
+
+Configured for Vercel in `vercel.json`:
+
+```json
+{
+  "buildCommand": "pnpm run build",
+  "installCommand": "pnpm install",
+  "outputDirectory": "dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
+```
+
+The SPA rewrite sends all routes to `index.html`; `search-index.*.json` is cached for 1 hour. Set `VITE_DOCS_API_URL` to the deployed backend when building for production.
+
+## License
+
+Proprietary. © SokoPlus. Not open source.
