@@ -1,0 +1,75 @@
+---
+title: Maagizo, rukoba ya ununuzi na kuhifadhi nafasi
+description: Rejea ya /api/orders, /api/cart na /api/bookings — malipo ya agizo, utekelezaji na usafirishaji.
+group: api
+order: 6
+updated: 2026-08-03
+---
+
+Maagizo, rukoba ya ununuzi na kuhifadhi nafasi vinahusika na mzunguko wa ununuzi.
+
+## Rukoba ya ununuzi (`/api/cart`)
+
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| POST | `/cart/add` | JWT | Ongeza/ongeza idadi ya bidhaa |
+| GET | `/cart` | JWT | Pata rukoba pamoja na maelezo ya bidhaa |
+| PATCH | `/cart/:id` | JWT | Sasisha idadi |
+| DELETE | `/cart/:id` | JWT | Ondoa bidhaa |
+| POST | `/cart/clear` | JWT | Futa rukoba |
+
+Kuongeza kwenye rukoba kunapandisha `addToCartCount` ya bidhaa.
+
+## Maagizo (`/api/orders`)
+
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| POST | `/orders/checkout` | JWT | Unda agizo kutoka kwenye rukoba (payment intent) |
+| GET | `/orders` | JWT | Maagizo yako |
+| GET | `/orders/vendor` | vendor+ | Maagizo yenye bidhaa zako |
+| GET | `/orders/:id` | JWT | Agizo moja |
+| PUT | `/orders/:id/status` | vendor+ | Sasisha hali |
+| PUT | `/orders/:id/verify-recipient` | JWT | Mteja anathibitisha kupokea |
+| PUT | `/orders/:id/cancel` | JWT | Ghairi (inarudisha stock) |
+| GET | `/orders/sales-report` | vendor | Ripoti ya mauzo ya kipindi |
+
+### Body ya malipo ya agizo
+
+```json
+{
+  "addressId": "...",
+  "deliveryZoneId": "...",
+  "paymentMethodId": "..."
+}
+```
+
+### Hali za agizo
+
+`pending` → `confirmed` → `shipped` → `delivered` | `cancelled` | `returned`
+
+<Callout type="note">
+Kuthibitisha agizo kunatengeneza **ID ya mpokeaji** inayotumika kwa uthibitishaji wa usafirishaji wa njia tatu.
+</Callout>
+
+## Kuhifadhi nafasi (`/api/bookings`)
+
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| POST | `/bookings` | client | Hifadhi nafasi ya huduma |
+| GET | `/bookings/my` | client | Nafasi zako |
+| GET | `/bookings/vendor` | service_provider | Nafasi za mtoa huduma |
+| PUT | `/bookings/:id/status` | service_provider | Sasisha hali |
+| POST | `/bookings/verify-qr` | delivery+ | Thibitisha QR ya kuhifadhi nafasi |
+
+## Usafirishaji (`/api/delivery`)
+
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| POST | `/delivery/create` | vendor+ | Unda mshirika wa usafirishaji |
+| GET | `/delivery/my-team` | vendor+ | Orodhesha timu |
+| POST | `/delivery/assign` | vendor+ | Kabidhi kwenye agizo (→ shipped) |
+| GET | `/delivery/my-deliveries` | delivery | Usafirishaji uliokabidhiwa |
+| PUT | `/delivery/:orderId/verify` | delivery | Thibitisha kukabidhiwa |
+| PUT | `/delivery/my-status` | delivery | Badilisha hali ya Active/offline |
+| GET | `/delivery/calculate` | Public | Ada ya usafirishaji kwa eneo |
+| GET | `/delivery/zones/public` | Public | Zones za usafirishaji za biashara |

@@ -1,0 +1,67 @@
+---
+title: Notifications & push
+description: How system notifications and push messaging work — Expo push, web push, preferences.
+group: platform
+order: 3
+updated: 2026-08-03
+---
+
+Notifications keep users in the loop. The backend delivers them through three channels: **in-app**, **Expo push** (mobile), and **web push** (browser).
+
+## Channels
+
+| Channel | Mechanism | When |
+|---------|-----------|------|
+| In-app | `Notification` rows + socket.io emit | Always |
+| Expo push | `expoPushToken` on the user, `expo-server-sdk` | Mobile apps |
+| Web push | `WebPushSubscription` + web-push library (VAPID) | Browser |
+
+## Registering for push
+
+```bash
+# Mobile (Expo token)
+curl -X PUT https://api.sokopluss.co.tz/api/notifications/update-expo-token \
+  -H "Authorization: Bearer <token>" \
+  -d '{"expoPushToken": "ExponentPushToken[...]"}'
+
+# Web (push subscription)
+curl -X POST https://api.sokopluss.co.tz/api/notifications/register-token \
+  -H "Authorization: Bearer <token>" \
+  -d '{"subscription": {"endpoint": "...", "keys": {"auth": "...", "p256dh": "..."}}}'
+```
+
+## Preferences
+
+Users can mute notification types via `GET/PUT /api/notifications/preferences`.
+
+| Preference | Controls |
+|------------|----------|
+| `order_updates` | Order status, delivery, escrow |
+| `promotions` | Promos, boosts, coupons |
+| `general` | Everything else |
+
+## What triggers a notification
+
+- Order placed / status changed
+- Delivery assigned / verified
+- New message
+- Vendor approval / rejection
+- Payment or refund events
+- Feature flag toggles (broadcast by audience)
+
+## Sending broadcasts (admin)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/notifications/notify-all` | Notify every user |
+| POST | `/api/notifications/notify-vendor` | Notify all vendors |
+
+<Callout type="note">
+`notify-all` can be expensive — it fans out to every registered token. Use sparingly.
+</Callout>
+
+## Security notes
+
+- Never log `expoPushToken` or VAPID private keys.
+- VAPID keys belong in env vars (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`).
+- Respect user preferences before sending promotional pushes.

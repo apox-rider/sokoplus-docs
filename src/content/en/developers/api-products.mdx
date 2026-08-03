@@ -1,0 +1,77 @@
+---
+title: Products
+description: Reference for /api/products — listing, CRUD, QR codes, and analytics.
+group: api
+order: 4
+updated: 2026-08-03
+---
+
+Products are the physical goods sold by vendors.
+
+## GET /products/all
+
+Public product listing.
+
+| Query | Description |
+|-------|-------------|
+| `category` | Filter by category slug |
+| `search` | Search by name/description |
+| `limit` | Max results (default 20) |
+
+## GET /products/:id
+
+Single product detail. Increments the product `viewCount`.
+
+## Product object (key fields)
+
+```json
+{
+  "id": "...",
+  "name": "Steel pipes 2m",
+  "description": "...",
+  "price": 45000,
+  "discountPrice": 40000,
+  "stock": 120,
+  "unit": "piece",
+  "imageUrl": ["https://.../image1.jpg"],
+  "status": "published",
+  "businessId": "...",
+  "categoryId": "...",
+  "viewCount": 340,
+  "addToCartCount": 18
+}
+```
+
+## Vendor product endpoints
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/products/add` | vendor+ | Create product (multipart images) |
+| PUT | `/products/:id` | vendor+ | Update product |
+| DELETE | `/products/:id` | vendor+ | Soft-delete product |
+| GET | `/products/myProducts` | vendor+ | Your products |
+| POST | `/products/qr/:id` | vendor+ | Generate product QR code |
+| POST | `/products/image` | vendor+ | Upload product image |
+
+<Callout type="warning">
+Business approval is required — vendors without an `APPROVED` business get a `403`.
+</Callout>
+
+## Boosts
+
+- `POST /products/boost` — purchase a product boost.
+- `GET /products/view-boosts` — active boosts.
+- `GET /products/category-analytics` — category performance (revenue = stock × price).
+
+## Trending endpoints
+
+| Path | Description |
+|------|-------------|
+| `GET /products/trending` | Trending products |
+| `GET /products/hot-deals` | Discounted products (≥ 15% off) |
+| `GET /products/new-arrivals` | Products from the last 14 days |
+| `GET /products/top-rated` | Top-rated products |
+
+<Callout type="note">
+These trending feeds are also aggregated in `GET /explore` and `GET /recommendations/*`.
+</Callout>

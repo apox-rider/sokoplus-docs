@@ -1,0 +1,87 @@
+---
+title: Muundo wa data
+description: Modeli kuu za Prisma zinazounda SokoPlus — watumiaji, biashara, fedha na uendeshaji.
+group: platform
+order: 1
+updated: 2026-08-03
+---
+
+SokoPlus huhifadhi kila kitu kwenye **PostgreSQL** na kuimodelisha kwa **Prisma**. Ukurasa huu unaelezea modeli kuu.
+
+## Utambulisho na majukumu
+
+| Model | Madhumuni |
+|-------|---------|
+| `User` | Akaunti yenye enum ya `Role`, vigezo vya uthibitishaji, kufuta kwa upole |
+| `BusinessProfile` | Rekodi ya biashara ya muuzaji/mtoa huduma, 1:1 na mtumiaji, ina hali |
+| `DeliveryPerson` | Wanachama wa timu ya usafirishaji wanaounganishwa na biashara + mtumiaji |
+| `Region` / `University` | Mikoa ya Tanzania na muktadha wa kampasi |
+
+## Biashara
+
+| Model | Madhumuni |
+|-------|---------|
+| `Product` (+ `ProductImage`) | Vitu halisi vyenye bei, stock, vipimo na kufuta kwa upole |
+| `Service` | Huduma za kitaalamu zenye bei ya msingi |
+| `ProductCategory` / `ServiceCategory` | Kategoria za ngazi (hierarchical) zenye icons |
+| `Order` / `OrderItem` | Maagizo yenye data ya usafirishaji na ID ya pekee ya mpokeaji |
+| `Cart` / `CartItem` | Rukoba za ununuzi |
+| `Booking` | Kuhifadhi nafasi za huduma |
+
+## Fedha
+
+| Model | Madhumuni |
+|-------|---------|
+| `Transaction` | Rekodi za malipo (hali, gateway) |
+| `Payout` | Utoaji wa malipo kwa wauzaji |
+| `Escrow` | Fedha zilizohifadhiwa kati ya malipo na uthibitisho |
+| `Commission` | Komisheni ya jukwaa kwa kila agizo |
+| `Credit` / `CreditTransaction` | Salio za referral/mikopo ya salio |
+| `Subscription` | Mipango ya viwango vya wauzaji |
+| `ServiceBoost` / `ProductBoost` | Orodha zilizokuzwa (matangazo) |
+| `Coupon` | Misimbo ya punguzo |
+| `FlashSale` (+ `FlashSaleParticipant`) | Matoleo yenye muda |
+| `Referral` | Viungo vya referral na zawadi |
+
+## Mawasiliano
+
+| Model | Madhumuni |
+|-------|---------|
+| `Message` | Ujumbe wa moja kwa moja baina ya watumiaji |
+| `Notification` | Arifa za mfumo |
+| `SupportTicket` | Mijadala ya usaidizi wa wateja |
+| `CustomerReport` | Ripoti za bug/lalamiko/kipengele |
+| `Feedback` / `Review` | Maoni yenye tathmini na udhibiti wa maudhui |
+| `WebPushSubscription` | Usajili wa push kwenye vivinjari |
+
+## Uendeshaji
+
+| Model | Madhumuni |
+|-------|---------|
+| `PlatformSetting` | Usanidi wa key-value (pamoja na swichi za vipengele vya ecommerce) |
+| `PlatformContent` | Kurasa za CMS (faragha, sheria) |
+| `FAQ` | Maswali yanayoulizwa mara kwa mara |
+| `ActivityLog` | Rekodi ya ukaguzi (audit trail) |
+| `OtpCode` | Nenosiri la wakati mmoja |
+| `TokenBlacklist` | Tokeni zilizobatilishwa |
+| `BannedIp` | IP zilizozuiwa |
+| `WorkingHours` | Ratiba za biashara |
+| `DeliveryZone` | Maeneo ya usafirishaji + ada |
+| `ShowcaseProject` | Miradi ya nje iliyokuzwa |
+
+## Muundo wa kufuta kwa upole
+
+Modeli nyingi zina `deletedAt` + `deletedBy`. Kufuta kunajaza sehemu hizo; queries za kawaida hazizijumlishi. Msimamizi anaweza kurejesha au kufuta kabisa kupitia `/admin/records`.
+
+## Enums
+
+| Enum | Thamani |
+|------|--------|
+| `Role` | `client`, `vendor`, `service_provider`, `delivery`, `partnerAdmin`, `majorAdmin`, `superAdmin` |
+| `BusinessStatus` | `APPROVED`, `PENDING`, `REJECTED`, `SUSPENDED` |
+| `OrderStatus` | `pending`, `confirmed`, `shipped`, `delivered`, `cancelled`, `returned` |
+| `TransactionStatus` / `PaymentStatus` | Hali ya mwendo wa fedha |
+
+<Callout type="note">
+Schema halisi ya Prisma iko kwenye repo ya backend chini ya `prisma/schema.prisma` — chukulia ukurasa huu kama muhtasari.
+</Callout>

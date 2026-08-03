@@ -1,0 +1,65 @@
+---
+title: Muhtasari wa usanifu wa mfumo
+description: Jinsi frontend, backend, hifadhidata na huduma za SokoPlus zinavyoungana.
+group: overview
+order: 3
+updated: 2026-08-03
+---
+
+SokoPlus ni programu ya full-stack iliyogawanywa kati ya frontend ya SPA na backend API.
+
+## Mchoro wa mfumo
+
+```text
+┌──────────────┐      HTTPS      ┌──────────────────┐
+│   Frontend   │ ──────────────▶ │   Backend API    │
+│  React 19    │   JSON / JWT    │   Express 5      │
+│ TanStack SSR │ ◀────────────── │   (REST /api/*)  │
+└──────────────┘      JSON       └────────┬─────────┘
+                                          │
+                              ┌───────────┼───────────┐
+                              ▼           ▼           ▼
+                       ┌──────────┐ ┌──────────┐ ┌──────────┐
+                       │PostgreSQL│ │  Redis   │ │ClickPesa │
+                       │ (Prisma) │ │ (cache)  │ │ (payments)│
+                       └──────────┘ └──────────┘ └──────────┘
+```
+
+## Muundo wa backend
+
+```
+src/
+├── app.js          # Entry: middleware pipeline, route mounting
+├── controllers/    # ~40 route handler modules
+├── routes/         # ~35 route definition files
+├── middleware/     # auth, validation, feature guards, rate limiting, errors
+├── lib/            # db, clickpesa, email, cloudinary, logger, socket, etc.
+└── services/       # escrow, commission, credit, referral, subscription, push
+```
+
+## Maamuzi muhimu ya kubuni
+
+- **Express 5 + JavaScript rahisi** — marudio ya haraka, ESM kila mahali.
+- **Prisma 7 + adapter ya PrismaPg** — ORM iliyo na aina (typed) juu ya PostgreSQL, singleton salama ya hot-reload.
+- **Zod schemas** (pakiti ya pamoja) — uthibitisho wa maombi kwenye mutations.
+- **JWT + RBAC middleware** — `protect` + `authorize(...roles)` kwenye kila njia iliyolindwa.
+- **HMAC webhooks** — callbacks za ClickPesa huthibitishwa kwa checksum, hivyo matukio ya malipo yanaaminika.
+- **Swichi za vipengele (feature flags)** — jedwali la `PlatformSetting` (`ecommerce:<key>`) linaweza kuzima vipengele jukwaani kote.
+
+## Mkataba wa frontend ↔ backend
+
+Frontend inawasiliana na backend kupitia REST API pekee. Hakuna ufikiaji wa moja kwa moja wa hifadhidata kutoka kwa mteja. Mawasiliano yote ni JSON kupitia HTTPS.
+
+## Mfano wa mtiririko wa data — kuweka agizo
+
+1. Frontend inaongeza bidhaa kwenye rukoba ya ununuzi (`POST /cart/add`).
+2. Malipo ya agizo (`POST /orders/checkout`) yanathibitisha stock, usafirishaji na saa za kazi.
+3. Malipo yanaanzishwa kupitia ClickPesa (`POST /payments/initiate`).
+4. Webhook ya ClickPesa inathibitisha malipo na kusasisha muamala.
+5. Agizo linaingia kwenye hali ya **inasubiri (pending)** na muuzaji anaarifiwa.
+
+## Wakati halisi (real-time)
+
+- **socket.io** hutuma matukio ya wakati halisi (k.m. uthibitisho wa malipo) kwa wateja walioounganishwa.
+- **Web push / Expo push** hupeleka arifa kwa vivinjari na vifaa.
+- Frontend pia **huchunguza (polls)** rasilimali muhimu kama njia mbadala.

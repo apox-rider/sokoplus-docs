@@ -1,0 +1,77 @@
+---
+title: Bidhaa
+description: Rejea ya /api/products — orodha, CRUD, misimbo ya QR na takwimu za uchambuzi (analytics).
+group: api
+order: 4
+updated: 2026-08-03
+---
+
+Bidhaa ni vitu halisi vinavyouzwa na wauzaji.
+
+## GET /products/all
+
+Orodha ya bidhaa za umma.
+
+| Query | Maelezo |
+|-------|-------------|
+| `category` | Chuja kwa slug ya kategoria |
+| `search` | Tafuta kwa jina/maelezo |
+| `limit` | Idadi ya juu zaidi ya matokeo (chaguo-msingi 20) |
+
+## GET /products/:id
+
+Maelezo ya bidhaa moja. Inapandisha `viewCount` ya bidhaa.
+
+## Muundo wa bidhaa (sehemu muhimu)
+
+```json
+{
+  "id": "...",
+  "name": "Steel pipes 2m",
+  "description": "...",
+  "price": 45000,
+  "discountPrice": 40000,
+  "stock": 120,
+  "unit": "piece",
+  "imageUrl": ["https://.../image1.jpg"],
+  "status": "published",
+  "businessId": "...",
+  "categoryId": "...",
+  "viewCount": 340,
+  "addToCartCount": 18
+}
+```
+
+## Endpoints za bidhaa za muuzaji
+
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| POST | `/products/add` | vendor+ | Unda bidhaa (picha za multipart) |
+| PUT | `/products/:id` | vendor+ | Sasisha bidhaa |
+| DELETE | `/products/:id` | vendor+ | Futa bidhaa kwa upole |
+| GET | `/products/myProducts` | vendor+ | Bidhaa zako |
+| POST | `/products/qr/:id` | vendor+ | Tengeneza msimbo wa QR wa bidhaa |
+| POST | `/products/image` | vendor+ | Pakia picha ya bidhaa |
+
+<Callout type="warning">
+Idhini ya biashara inahitajika — wauzaji wasio na biashara ya `APPROVED` hupata `403`.
+</Callout>
+
+## Kukuza tangazo (boosts)
+
+- `POST /products/boost` — nunua kukuza tangazo la bidhaa.
+- `GET /products/view-boosts` — matangazo yanayotumika.
+- `GET /products/category-analytics` — utendaji wa kategoria (mapato = stock × price).
+
+## Endpoints za mwelekeo (trending)
+
+| Path | Maelezo |
+|------|-------------|
+| `GET /products/trending` | Bidhaa zinazoendelea |
+| `GET /products/hot-deals` | Bidhaa zilizopunguzwa bei (≥ 15% punguzo) |
+| `GET /products/new-arrivals` | Bidhaa za siku 14 zilizopita |
+| `GET /products/top-rated` | Bidhaa zilizopata tathmini za juu |
+
+<Callout type="note">
+Orodha hizi za mwelekeo (trending) pia zinajumuishwa kwenye `GET /explore` na `GET /recommendations/*`.
+</Callout>

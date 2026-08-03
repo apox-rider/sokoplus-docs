@@ -1,0 +1,75 @@
+---
+title: Orders, cart & bookings
+description: Reference for /api/orders, /api/cart and /api/bookings — checkout, fulfilment and delivery.
+group: api
+order: 6
+updated: 2026-08-03
+---
+
+Orders, cart and bookings cover the purchasing flow.
+
+## Cart (`/api/cart`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/cart/add` | JWT | Add/increment item |
+| GET | `/cart` | JWT | Get cart with product details |
+| PATCH | `/cart/:id` | JWT | Update quantity |
+| DELETE | `/cart/:id` | JWT | Remove item |
+| POST | `/cart/clear` | JWT | Clear cart |
+
+Adding to cart increments the product's `addToCartCount`.
+
+## Orders (`/api/orders`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/orders/checkout` | JWT | Create order from cart (payment intent) |
+| GET | `/orders` | JWT | Your orders |
+| GET | `/orders/vendor` | vendor+ | Orders with your products |
+| GET | `/orders/:id` | JWT | Single order |
+| PUT | `/orders/:id/status` | vendor+ | Update status |
+| PUT | `/orders/:id/verify-recipient` | JWT | Client confirms receipt |
+| PUT | `/orders/:id/cancel` | JWT | Cancel (restores stock) |
+| GET | `/orders/sales-report` | vendor | Period sales report |
+
+### Checkout body
+
+```json
+{
+  "addressId": "...",
+  "deliveryZoneId": "...",
+  "paymentMethodId": "..."
+}
+```
+
+### Order statuses
+
+`pending` → `confirmed` → `shipped` → `delivered` | `cancelled` | `returned`
+
+<Callout type="note">
+Confirming an order generates a **recipient ID** used for the 3-way delivery verification.
+</Callout>
+
+## Bookings (`/api/bookings`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/bookings` | client | Book a service |
+| GET | `/bookings/my` | client | Your bookings |
+| GET | `/bookings/vendor` | service_provider | Provider's bookings |
+| PUT | `/bookings/:id/status` | service_provider | Update status |
+| POST | `/bookings/verify-qr` | delivery+ | Verify a booking QR |
+
+## Delivery (`/api/delivery`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/delivery/create` | vendor+ | Create delivery person |
+| GET | `/delivery/my-team` | vendor+ | List team |
+| POST | `/delivery/assign` | vendor+ | Assign to order (→ shipped) |
+| GET | `/delivery/my-deliveries` | delivery | Assigned deliveries |
+| PUT | `/delivery/:orderId/verify` | delivery | Verify handover |
+| PUT | `/delivery/my-status` | delivery | Active/offline toggle |
+| GET | `/delivery/calculate` | Public | Delivery fee for location |
+| GET | `/delivery/zones/public` | Public | Business delivery zones |

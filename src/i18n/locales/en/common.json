@@ -1,0 +1,20 @@
+{
+  "logo": {
+    "alt": "SokoPlus logo",
+    "brand": "SokoPlus"
+  },
+  "tagline": "Industrial Commerce Platform",
+  "searchPlaceholder": "Search docs…",
+  "searchNoResults": "No results found",
+  "searchResultsFor": "Results for",
+  "loading": "Loading…",
+  "editOnGithub": "Edit on GitHub",
+  "notFound": {
+    "title": "Page not found",
+    "message": "The page you are looking for doesn't exist or has moved.",
+    "backHome": "Back to home"
+  },
+  "prev": "Previous",
+  "next": "Next",
+  "updatedOn": "Updated"
+}

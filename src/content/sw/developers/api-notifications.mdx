@@ -1,0 +1,62 @@
+---
+title: Arifa na ujumbe
+description: Rejea ya /api/notifications, /api/messages, /api/content na endpoints za msaada.
+group: api
+order: 8
+updated: 2026-08-03
+---
+
+Endpoints hizi zinashughulikia mawasiliano baina ya watumiaji na maudhui ya jukwaa.
+
+## Arifa (`/api/notifications`)
+
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| GET | `/notifications` | JWT | Arifa zako |
+| PUT | `/notifications/:id/read` | JWT | Weka alama ya kusoma kwa arifa moja |
+| PUT | `/notifications/read-all` | JWT | Weka alama ya kusoma zote |
+| DELETE | `/notifications/clear` | JWT | Futa zote |
+| POST | `/notifications/register-token` | JWT | Sajili usajili wa web-push |
+| PUT | `/notifications/update-expo-token` | JWT | Sasisha tokeni ya push ya Expo |
+| GET | `/notifications/preferences` | JWT | Pata mapendeleo |
+| PUT | `/notifications/preferences` | JWT | Sasisha mapendeleo |
+| POST | `/notifications/notify-all` | admin | Arifu kila mtu |
+| POST | `/notifications/notify-vendor` | admin | Arifu wauzaji |
+
+Mapendeleo: `order_updates`, `promotions`, `general`.
+
+## Ujumbe (`/api/messages`)
+
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| POST | `/messages` | JWT | Tuma ujumbe |
+| GET | `/messages/conversations` | JWT | Mazungumzo + idadi ya ujumbe usiosomwa |
+| GET | `/messages/:userId` | JWT | Mjadala na mtumiaji |
+| PUT | `/messages/:id/read` | JWT | Weka alama ya kusoma kwa ujumbe mmoja |
+| PUT | `/messages/read/:userId` | JWT | Weka alama ya kusoma ujumbe wote wa mtumiaji |
+| GET | `/messages/unread/count` | JWT | Jumla ya ujumbe usiosomwa |
+
+## Maudhui na msaada (`/api/content`)
+
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| GET | `/content/platform/:key` | Public | Ukurasa wa CMS (faragha, sheria) |
+| PUT | `/content/platform/:key` | superAdmin | Unda au sasisha ukurasa wa CMS |
+| GET | `/content/faq` | Public | FAQs zinazotumika |
+| GET | `/content/faq/all` | partnerAdmin+ | FAQs zote |
+| POST/PUT/DELETE | `/content/faq...` | partnerAdmin+ | CRUD ya FAQ |
+| POST | `/content/support/tickets` | JWT | Unda tikiti |
+| GET | `/content/support/tickets` | JWT | Tikiti zako |
+| GET | `/content/support/tickets/all` | partnerAdmin+ | Tikiti zote |
+| PUT | `/content/support/tickets/:id` | partnerAdmin+ | Sasisha hali |
+| POST | `/content/support/tickets/:id/reply` | partnerAdmin+ | Jibu |
+
+## Mawasiliano mengine
+
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| POST | `/feedback` | client | Maoni ya agizo |
+| GET | `/feedback` | Public | Maoni yaliyoidhinishwa + takwimu |
+| POST | `/reviews` | client | Unda tathmini |
+| GET | `/reviews` | Public | Tathmini zilizoidhinishwa |
+| POST | `/reports` | JWT | Tuma ripoti (bug/lalamiko/n.k.) |

@@ -1,0 +1,20 @@
+{
+  "logo": {
+    "alt": "Nembo ya SokoPlus",
+    "brand": "SokoPlus"
+  },
+  "tagline": "Jukwaa la Biashara ya Viwanda",
+  "searchPlaceholder": "Tafuta hati…",
+  "searchNoResults": "Hakuna matokeo",
+  "searchResultsFor": "Matokeo ya",
+  "loading": "Inapakia…",
+  "editOnGithub": "Hariri kwenye GitHub",
+  "notFound": {
+    "title": "Ukurasa haupo",
+    "message": "Ukurasa unaoutafuta haupo au umehamishwa.",
+    "backHome": "Rudi nyumbani"
+  },
+  "prev": "Iliyotangulia",
+  "next": "Inayofuata",
+  "updatedOn": "Imesasishwa"
+}

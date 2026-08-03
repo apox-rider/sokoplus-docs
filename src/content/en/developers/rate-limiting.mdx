@@ -1,0 +1,57 @@
+---
+title: Rate limits & security
+description: API rate limiting, input validation, and the security headers applied by the SokoPlus backend.
+group: authentication
+order: 3
+updated: 2026-08-03
+---
+
+The backend applies several layers of protection to every request.
+
+## Rate limiting
+
+Rate limits are applied globally and on sensitive paths:
+
+| Limiter | Scope | Limit |
+|---------|-------|-------|
+| `globalLimiter` | All `/api/*` requests | 200 per 15 minutes |
+| `authLimiter` | All `/api/auth/*` requests | 20 per 15 minutes |
+| `userStrictLimiter` | Non-GET requests | 30 per minute |
+
+<CodeBlock title="429 response">
+```json
+{
+  "status": "error",
+  "message": "Too many requests, please try again later."
+}
+```
+</CodeBlock>
+
+<Callout type="tip">
+Respect `Retry-After` headers and back off exponentially instead of retrying immediately.
+</Callout>
+
+## Input validation
+
+- **Zod schemas** (from the shared `@trustflow/shared` package) validate request bodies on mutations.
+- Legacy `express-validator` chains remain in `src/middleware/validate.js`.
+- Invalid input returns `400 Bad Request` with field errors.
+
+## Security headers (Helmet)
+
+Helmet sets headers to prevent common attacks:
+
+- X-Content-Type-Options, X-Frame-Options, X-XSS-Protection
+- Strict-Transport-Security, Content-Security-Policy guidance
+- Referrer-Policy and Permissions-Policy
+
+## CORS
+
+Only whitelisted origins (from `CORS_ORIGIN` / `CORS_ORIGIN2`) can call the API from browsers. Everything else is blocked.
+
+## Other protections
+
+- **Input sanitization** — the frontend strips HTML from outgoing data.
+- **Soft deletes** — destructive actions set `deletedAt` instead of removing rows.
+- **Activity logging** — admin actions are recorded for audit.
+- **Feature guards** — disabled features return `503` with a configurable message.

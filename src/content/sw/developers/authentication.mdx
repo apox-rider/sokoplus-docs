@@ -1,0 +1,83 @@
+---
+title: Uthibitishaji
+description: Jinsi JWT, OTP na kuingia kwa Google zinavyofanya kazi kwenye API ya SokoPlus, na jinsi ya kulinda vipindi (sessions).
+group: authentication
+order: 1
+updated: 2026-08-03
+---
+
+SokoPlus hutumia **tokeni za JWT bearer** kwa maombi yote yaliyothibitishwa. Tokeni hutolewa baada ya kuingia, uthibitishaji wa OTP, au kuingia kwa Google.
+
+## Kupata tokeni
+
+### Kuingia kwa barua pepe + nenosiri
+
+```bash
+curl -X POST https://api.sokopluss.co.tz/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "you@example.com", "password": "secret"}'
+```
+
+<CodeBlock title="Response">
+```json
+{
+  "status": "success",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": { "id": "...", "email": "you@example.com", "role": "client" }
+  }
+}
+```
+</CodeBlock>
+
+### OTP (usajili na urejeshaji)
+
+1. `POST /auth/signup` ukitumia taarifa zako → hutuma msimbo wa tarakimu 6.
+2. `POST /auth/otp/verify` ukitumia msimbo → hurudisha JWT kwa watumiaji wapya.
+3. Kuweka upya nenosiri kunatumia mzunguko huo huo: `/auth/forgot-password/send` → `/verify` → `/reset`.
+
+### Kuingia kwa Google
+
+`POST /auth/google` ukitumia tokeni ya Google OAuth kutoka kwenye web client ID yako.
+
+## Kutumia tokeni
+
+Tuma kwenye kila ombi lililothibitishwa:
+
+```bash
+curl https://api.sokopluss.co.tz/api/user/profile \
+  -H "Authorization: Bearer <token>"
+```
+
+## Endpoints za uthibitishaji
+
+| Method | Path | Maelezo |
+|--------|------|-------------|
+| POST | `/auth/signup` | Anza usajili (hutuma OTP) |
+| POST | `/auth/login` | Kuingia kwa barua pepe + nenosiri |
+| POST | `/auth/otp/send` | Tuma OTP ya uthibitishaji |
+| POST | `/auth/otp/verify` | Thibitisha OTP (hurudisha JWT ikiwa mtumiaji ni mpya) |
+| POST | `/auth/otp/link` | Unganisha namba ya simu kwenye akaunti |
+| POST | `/auth/google` | Kuingia kwa Google OAuth |
+| POST | `/auth/logout` | Batilisha kipindi (session) |
+| POST | `/auth/refresh` | Fanya upya tokeni |
+| POST | `/auth/forgot-password/send` | Tuma OTP ya kuweka upya |
+| POST | `/auth/forgot-password/verify` | Thibitisha msimbo wa kuweka upya |
+| POST | `/auth/forgot-password/reset` | Weka nenosiri jipya |
+| GET | `/auth/me` | Wasifu wa mtumiaji wa sasa (pamoja na biashara) |
+| POST | `/auth/check-exists` | Angalia ikiwa mtumiaji yupo |
+
+## Uthibitishaji wa tokeni
+
+Middleware ya `protect`:
+
+- Inasimbua JWT kutoka kwenye header ya `Authorization`.
+- Inapakia mtumiaji kutoka kwenye hifadhidata.
+- Inawakataa watumiaji waliofutwa kwa upole, waliosimamishwa au wasiostahili.
+- Inaambatisha mtumiaji kwenye `req.user`.
+
+<Callout type="warning">
+Majibu ya 401 yanamaanisha tokeni yako haipo, imekwisha muda wake, au mtumiaji amezuiwa. Jithibitishe tena ili kuendelea.
+</Callout>
+
+Udhibiti wa ufikiaji kulingana na jukumu (RBAC) hutumika juu ya uthibitishaji wa JWT kwenye API nzima.

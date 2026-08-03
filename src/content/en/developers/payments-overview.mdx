@@ -1,0 +1,55 @@
+---
+title: Payments overview
+description: The payment flow on SokoPlus — intents, payouts, and how money moves.
+group: payments
+order: 1
+updated: 2026-08-03
+---
+
+Payments on SokoPlus go through a **payment gateway** (ClickPesa). The flow is split into *initiate* (you create a payment intent) and *confirm* (the gateway webhook tells us it succeeded).
+
+## Payment endpoints (`/api/payments`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/payments/initiate` | JWT | Create a payment intent (order) |
+| POST | `/payments/initiate-payout` | admin | Initiate vendor payout |
+| GET | `/payments/payout-status` | vendor | Check payout status |
+| GET | `/payments/vendor-balance` | vendor | Vendor earnings balance |
+| POST | `/payments/purchase-subscription` | vendor | Buy subscription |
+| POST | `/payments/purchase-boost` | vendor | Buy service boost |
+| POST | `/payments/purchase-product-boost` | vendor | Buy product boost |
+
+## The order payment flow
+
+1. **Checkout** — `POST /orders/checkout` creates the order with a payment intent.
+2. **Initiate** — `POST /payments/initiate` creates a gateway payment for the order.
+3. **Gateway** — the buyer completes payment (mobile money, card, etc.).
+4. **Webhook** — ClickPesa calls `/api/clickpesa/payment` with the result.
+5. **Confirm** — the backend updates the transaction and order, and creates the escrow record.
+
+## Payouts
+
+Vendor earnings accumulate as a balance. Payouts are initiated by admins and confirmed via the ClickPesa payout webhook.
+
+<Callout type="note">
+All transactions record a `TransactionStatus`, `PaymentStatus` and `PaymentGateway` so the money trail is auditable.
+</Callout>
+
+## Transaction model
+
+Key fields:
+
+| Field | Description |
+|-------|-------------|
+| `amount` | Amount in TZS |
+| `status` | Transaction status |
+| `paymentStatus` | Payment status |
+| `gateway` | Gateway used |
+| `orderId` | Related order (nullable) |
+| `type` | Order / subscription / boost |
+
+## Next
+
+- See [ClickPesa integration](/en/developers/clickpesa-integration) for gateway specifics.
+- See [Webhooks](/en/developers/webhooks) for how callbacks are verified.

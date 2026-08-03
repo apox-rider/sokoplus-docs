@@ -1,0 +1,60 @@
+---
+title: Hifadhi ya malipo (escrow) na komisheni
+description: Jinsi escrow inavyolinda shughuli za kifedha na jinsi komisheni za jukwaa zinavyofuatiliwa.
+group: payments
+order: 4
+updated: 2026-08-03
+---
+
+Taratibu mbili zinahifadhi usawa wa usafirishaji wa fedha: **escrow** (hifadhi ya malipo) na **komisheni**.
+
+## Escrow (`/api/escrow`)
+
+Escrow hushikilia fedha hadi usafirishaji uthibitishwe.
+
+| Mbinu | Njia | Uthibitishaji | Maelezo |
+|--------|------|------|-------------|
+| GET | `/escrow/status/:orderId` | JWT | Hali ya escrow ya agizo |
+| POST | `/escrow/initiate-release` | admin | Toa fedha kwa muuzaji |
+| POST | `/escrow/initiate-refund` | admin | Rudisha fedha kwa mteja |
+| POST | `/escrow/confirm` | admin | Thibitisha utoaji/kurudishiwa |
+| POST | `/escrow/process-expired` | superAdmin | Fagia escrow zilizoisha muda |
+
+### Mzunguko wa maisha wa escrow
+
+1. **Imeundwa (Created)** — wakati webhook ya malipo ya agizo inapothibitishwa.
+2. **Imehifadhiwa (Held)** — fedha zinakaa hadi agizo litakapowasilishwa na kuthibitishwa.
+3. **Imetolewa (Released)** — fedha zinakwenda kwa muuzaji baada ya uthibitisho wa upokeaji.
+4. **Imerudishiwa (Refunded)** — fedha zinarejea kwa mteja baada ya kurudishiwa fedha kuidhinishwa.
+
+## Komisheni
+
+Jukwaa litoza komisheni kwenye maagizo (inafuatiliwa kwenye mfano wa `Commission`).
+
+| Sehemu | Maelezo |
+|-------|-------------|
+| `businessId` | Muuzaji anayepokea agizo |
+| `orderId` | Agizo linalohusika |
+| `amount` | Kiasi cha komisheni |
+| `rate` | Kiwango cha komisheni |
+| `status` | Inasubiri / imelipwa |
+
+- Komisheni huorodheshwa chini ya `GET /admin/commissions` (superAdmin).
+- Tia alama kuwa imelipwa kupitia `PUT /admin/commissions/:id/pay`.
+
+<Callout type="note">
+Ufuatiliaji wa komisheni unaweza kuwashwa au kuzimwa kupitia swichi ya `commission`.
+</Callout>
+
+## Mtiririko kamili wa fedha
+
+```text
+Buyer pays ──▶ Escrow held ──▶ Delivery confirmed ──▶ Released to vendor
+                                     │
+                                     └──▶ Commission recorded ──▶ Paid out
+```
+
+## Inayofuata
+
+- Angalia [Muhtasari wa malipo](/sw/developers/payments-overview).
+- Angalia [Swichi za vipengele](/sw/developers/ecommerce-controls) kwa udhibiti wa komisheni.

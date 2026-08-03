@@ -1,0 +1,87 @@
+---
+title: Data model
+description: The core Prisma models behind SokoPlus — users, commerce, money and operations.
+group: platform
+order: 1
+updated: 2026-08-03
+---
+
+SokoPlus stores everything in **PostgreSQL** and models it with **Prisma**. This page covers the core models.
+
+## Identity & roles
+
+| Model | Purpose |
+|-------|---------|
+| `User` | Account with a `Role` enum, verification flags, soft-delete |
+| `BusinessProfile` | Vendor/provider business record, 1:1 with a user, has a status |
+| `DeliveryPerson` | Delivery team members linked to a business + user |
+| `Region` / `University` | Tanzania regions and campus contexts |
+
+## Commerce
+
+| Model | Purpose |
+|-------|---------|
+| `Product` (+ `ProductImage`) | Physical goods with price, stock, metrics, soft-delete |
+| `Service` | Professional services with base price |
+| `ProductCategory` / `ServiceCategory` | Hierarchical categories with icons |
+| `Order` / `OrderItem` | Orders with delivery data and a unique recipient ID |
+| `Cart` / `CartItem` | Shopping carts |
+| `Booking` | Service bookings |
+
+## Money
+
+| Model | Purpose |
+|-------|---------|
+| `Transaction` | Payment records (status, gateway) |
+| `Payout` | Vendor payouts |
+| `Escrow` | Held funds between payment and confirmation |
+| `Commission` | Platform commission per order |
+| `Credit` / `CreditTransaction` | Referral/credit balances |
+| `Subscription` | Vendor tier plans |
+| `ServiceBoost` / `ProductBoost` | Promoted listings |
+| `Coupon` | Discount codes |
+| `FlashSale` (+ `FlashSaleParticipant`) | Time-limited deals |
+| `Referral` | Referral links and rewards |
+
+## Communication
+
+| Model | Purpose |
+|-------|---------|
+| `Message` | Direct messages between users |
+| `Notification` | System notifications |
+| `SupportTicket` | Customer support threads |
+| `CustomerReport` | Bug/complaint/feature reports |
+| `Feedback` / `Review` | Rated feedback with moderation |
+| `WebPushSubscription` | Browser push subscriptions |
+
+## Operations
+
+| Model | Purpose |
+|-------|---------|
+| `PlatformSetting` | Key-value config (incl. ecommerce feature flags) |
+| `PlatformContent` | CMS pages (privacy, terms) |
+| `FAQ` | Frequently asked questions |
+| `ActivityLog` | Audit trail |
+| `OtpCode` | One-time passwords |
+| `TokenBlacklist` | Revoked tokens |
+| `BannedIp` | Blocked IPs |
+| `WorkingHours` | Business schedules |
+| `DeliveryZone` | Delivery areas + fees |
+| `ShowcaseProject` | Promoted external projects |
+
+## Soft delete pattern
+
+Most models have `deletedAt` + `deletedBy`. Deleting sets those fields; normal queries exclude them. Admins can restore or permanently remove via `/admin/records`.
+
+## Enums
+
+| Enum | Values |
+|------|--------|
+| `Role` | `client`, `vendor`, `service_provider`, `delivery`, `partnerAdmin`, `majorAdmin`, `superAdmin` |
+| `BusinessStatus` | `APPROVED`, `PENDING`, `REJECTED`, `SUSPENDED` |
+| `OrderStatus` | `pending`, `confirmed`, `shipped`, `delivered`, `cancelled`, `returned` |
+| `TransactionStatus` / `PaymentStatus` | Status/state of money movement |
+
+<Callout type="note">
+The exact Prisma schema lives in the backend repository under `prisma/schema.prisma` — treat this page as a summary.
+</Callout>

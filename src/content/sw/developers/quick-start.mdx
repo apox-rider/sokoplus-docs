@@ -1,0 +1,89 @@
+---
+title: Kuanza haraka
+description: Njia ya haraka zaidi ya kuwa na muunganisho wa API ya SokoPlus unaofanya kazi — base URL, uthibitishaji, na maombi ya kwanza.
+group: overview
+order: 2
+updated: 2026-08-03
+---
+
+Hapa kuna njia ya haraka zaidi ya kufanya ombi lako la kwanza lililothibitishwa.
+
+## 1. Pata base URL
+
+Maombi yote ya API yanatumia:
+
+```text
+https://api.sokopluss.co.tz/api
+```
+
+## 2. Ukaguzi wa afya ya seva
+
+Thibitisha kuwa API inapatikana:
+
+```bash
+curl https://api.sokopluss.co.tz/api/health
+```
+
+<CodeBlock title="Response">
+```json
+{
+  "status": "ok",
+  "database": "connected"
+}
+```
+</CodeBlock>
+
+## 3. Jisajili au ingia
+
+Ili kupata tokeni, jisajili mtumiaji na uthibitishe OTP, au ingia na akaunti iliyopo:
+
+```bash
+curl -X POST https://api.sokopluss.co.tz/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "you@example.com", "password": "your-password"}'
+```
+
+<CodeBlock title="Response (truncated)">
+```json
+{
+  "status": "success",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIs..."
+  }
+}
+```
+</CodeBlock>
+
+## 4. Piga endpoint iliyohitaji uthibitishaji
+
+Tuma tokeni kama bearer header:
+
+```bash
+curl https://api.sokopluss.co.tz/api/user/profile \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."
+```
+
+## 5. Chunguza endpoints za umma
+
+Hakuna tokeni inayohitajika kwa hizi:
+
+| Endpoint | Madhumuni |
+|----------|---------|
+| `GET /products/all` | Orodhesha bidhaa |
+| `GET /services/all` | Orodhesha huduma |
+| `GET /business/all` | Orodhesha biashara zilizoidhinishwa |
+| `GET /categories` | Orodhesha kategoria |
+| `GET /explore` | Ugunduzi wa soko |
+
+## Vichwa vya kawaida
+
+| Kichwa | Thamani | Lini |
+|--------|-------|------|
+| `Authorization` | `Bearer <jwt>` | Maombi yote yaliyothibitishwa |
+| `Content-Type` | `application/json` | Miili yote ya JSON |
+
+<Callout type="warning">
+Linde siri ya JWT yako upande wa mteja. Usiweke tokeni kwenye hazina za umma (public repositories).
+</Callout>
+
+Hatua inayofuata: elewa jinsi [uthibitishaji](/sw/developers/authentication) unavyofanya kazi.

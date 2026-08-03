@@ -1,0 +1,55 @@
+---
+title: Muhtasari wa malipo
+description: Mtiririko wa malipo kwenye SokoPlus — intents, utoaji wa malipo, na jinsi fedha zinavyosafiri.
+group: payments
+order: 1
+updated: 2026-08-03
+---
+
+Malipo kwenye SokoPlus hupitia **lango la malipo** (payment gateway) (ClickPesa). Mtiririko umegawanyika katika *kuzindua* (unaunda payment intent) na *kuthibitisha* (webhook ya lango hutuambia kwamba imefanikiwa).
+
+## Endpoints za malipo (`/api/payments`)
+
+| Mbinu | Njia | Uthibitishaji | Maelezo |
+|--------|------|------|-------------|
+| POST | `/payments/initiate` | JWT | Tengeneza payment intent (agizo) |
+| POST | `/payments/initiate-payout` | admin | Zindua utoaji wa malipo kwa muuzaji |
+| GET | `/payments/payout-status` | vendor | Angalia hali ya utoaji wa malipo |
+| GET | `/payments/vendor-balance` | vendor | Salio la mapato ya muuzaji |
+| POST | `/payments/purchase-subscription` | vendor | Nunua usajili wa mwezi |
+| POST | `/payments/purchase-boost` | vendor | Nunua kukuza tangazo la huduma |
+| POST | `/payments/purchase-product-boost` | vendor | Nunua kukuza tangazo la bidhaa |
+
+## Mtiririko wa malipo ya agizo
+
+1. **Checkout** — `POST /orders/checkout` huunda agizo pamoja na payment intent.
+2. **Zindua** — `POST /payments/initiate` huunda malipo ya lango kwa agizo.
+3. **Lango** — mteja anakamilisha malipo (mobile money, kadi, n.k.).
+4. **Webhook** — ClickPesa hupiga `/api/clickpesa/payment` na matokeo.
+5. **Thibitisha** — backend husasisha shughuli na agizo, na kuunda rekodi ya escrow.
+
+## Utoaji wa malipo (payouts)
+
+Mapato ya muuzaji hukusanyika kama salio. Utoaji wa malipo huzinduliwa na msimamizi na kuthibitishwa kupitia webhook ya utoaji wa malipo ya ClickPesa.
+
+<Callout type="note">
+Shughuli zote hurekodi `TransactionStatus`, `PaymentStatus` na `PaymentGateway` ili kumbukumbu ya fedha iweze kufuatiliwa (auditable).
+</Callout>
+
+## Mfano wa shughuli
+
+Sehemu muhimu:
+
+| Sehemu | Maelezo |
+|-------|-------------|
+| `amount` | Kiasi kwa TZS |
+| `status` | Hali ya shughuli |
+| `paymentStatus` | Hali ya malipo |
+| `gateway` | Lango lililotumika |
+| `orderId` | Agizo linalohusika (linaweza kutokuwa na thamani) |
+| `type` | Agizo / usajili wa mwezi / kukuza tangazo |
+
+## Inayofuata
+
+- Angalia [Muunganisho wa ClickPesa](/sw/developers/clickpesa-integration) kwa maelezo maalum ya lango.
+- Angalia [Webhooks](/sw/developers/webhooks) kwa jinsi viitikio (callbacks) vinavyothibitishwa.

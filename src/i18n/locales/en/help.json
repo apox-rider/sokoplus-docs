@@ -1,0 +1,17 @@
+{
+  "title": "Help Centre",
+  "subtitle": "Guides for using SokoPlus — from your first order to running a verified shop.",
+  "onThisPage": "On this page",
+  "needMoreHelp": "Need more help?",
+  "contactSupport": "Contact support",
+  "groups": {
+    "getting-started": "Getting Started",
+    "buyers": "Buyers",
+    "vendors": "Vendors",
+    "service-providers": "Service Providers",
+    "delivery": "Delivery Partners",
+    "payments": "Payments & Billing",
+    "trust-safety": "Trust & Safety",
+    "faq": "FAQ"
+  }
+}

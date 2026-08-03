@@ -1,0 +1,15 @@
+{
+  "title": "Hati za Waendelezaji",
+  "subtitle": "Kila unachohitaji kuunganisha na jukwaa la SokoPlus — REST API, uthibitishaji, webhooks na zaidi.",
+  "onThisPage": "Ukurasa huu",
+  "baseUrl": "URL ya Msingi",
+  "auth": "Uthibitishaji",
+  "groups": {
+    "overview": "Muhtasari",
+    "authentication": "Uthibitishaji",
+    "api": "Rejea ya API",
+    "payments": "Malipo na Webhooks",
+    "platform": "Dhana za Jukwaa",
+    "deployment": "Uwekaji"
+  }
+}

@@ -1,0 +1,58 @@
+---
+title: Webhooks
+description: How ClickPesa payment and payout webhooks work, and how the backend verifies them.
+group: payments
+order: 3
+updated: 2026-08-03
+---
+
+Webhooks are the gateway's way of telling the backend that a payment or payout finished. They are **unauthenticated HTTP endpoints** secured by checksum verification instead.
+
+## Endpoints
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /api/clickpesa/payment` | Payment result |
+| `POST /api/clickpesa/payout` | Payout result |
+
+## Verification flow
+
+1. ClickPesa sends a JSON body plus a checksum.
+2. The backend recomputes the **HMAC-SHA256** signature over the canonical body using `CLICKPESA_CHECKSUM_KEY`.
+3. If the checksums match, the event is processed.
+4. Otherwise the webhook is rejected.
+
+<CodeBlock title="Pseudocode">
+```js
+const expected = hmacSHA256(canonicalJson(body), CHECKSUM_KEY)
+if (headerChecksum !== expected) return res.status(401).end()
+```
+</CodeBlock>
+
+## Payment webhook effects
+
+On a verified payment:
+
+- The `Transaction` is updated (status, payment status, references).
+- The related **order** is updated.
+- An **escrow** record is created for the order.
+- Subscriptions / service boosts are activated when their payments arrive.
+- The user is notified via socket.io / push.
+
+<Callout type="warning">
+Idempotency matters — handle duplicate webhook deliveries gracefully (e.g. check transaction status before re-processing).
+</Callout>
+
+## Configuring your own webhooks
+
+Your integration should:
+
+1. Expose a URL ClickPesa can reach.
+2. Verify the checksum on every callback before trusting it.
+3. Respond quickly (`2xx`) so the gateway doesn't retry.
+4. Reconcile with your transaction records.
+
+## Next
+
+- See [ClickPesa integration](/en/developers/clickpesa-integration).
+- See [Escrow & commissions](/en/developers/escrow-commissions) for what happens after payment.

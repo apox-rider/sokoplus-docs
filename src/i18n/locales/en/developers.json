@@ -1,0 +1,15 @@
+{
+  "title": "Developer Documentation",
+  "subtitle": "Everything you need to integrate with the SokoPlus platform — REST API, authentication, webhooks and more.",
+  "onThisPage": "On this page",
+  "baseUrl": "Base URL",
+  "auth": "Authentication",
+  "groups": {
+    "overview": "Overview",
+    "authentication": "Authentication",
+    "api": "API Reference",
+    "payments": "Payments & Webhooks",
+    "platform": "Platform Concepts",
+    "deployment": "Deployment"
+  }
+}

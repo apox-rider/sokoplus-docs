@@ -1,0 +1,41 @@
+---
+title: Introduction
+description: An overview of the SokoPlus platform API — what it is, the stack, and who it's for.
+group: overview
+order: 1
+updated: 2026-08-03
+---
+
+This documentation covers the SokoPlus platform: its **public API**, the **data model**, and the **concepts** behind the marketplace. It's intended for developers building on top of SokoPlus or integrating their own systems.
+
+## The platform at a glance
+
+- **Frontend:** React 19 + TanStack Start (SSR), Tailwind CSS v4, bilingual EN/SW
+- **Backend:** Node.js + Express 5 (ESM)
+- **Database:** PostgreSQL 17 via Prisma 7
+- **Auth:** JWT (bearer) + OTP + Google OAuth, role-based access control
+- **Payments:** ClickPesa with HMAC-verified webhooks
+- **Realtime:** socket.io + push notifications (web-push + Expo)
+
+## The API
+
+The REST API is mounted under `/api`. All responses are JSON. Mutations generally require authentication, and role-based middleware enforces who can call what.
+
+<Callout type="note">
+Throughout these docs, the base URL is shown as `https://api.sokopluss.co.tz/api`. Your actual environment may differ — check your deployment configuration.
+</Callout>
+
+## What you'll find here
+
+| Section | Contents |
+|---------|----------|
+| **Quick start** | The fastest way to get a working integration |
+| **Authentication** | JWT, OTP, Google sign-in, roles & permissions |
+| **API reference** | Endpoint-by-endpoint documentation grouped by resource |
+| **Payments & webhooks** | ClickPesa, escrow, commissions, webhook signing |
+| **Platform concepts** | Data model, feature flags, notifications |
+| **Deployment** | Running the backend, environment variables |
+
+## A word on stability
+
+The platform is actively developed. Endpoint paths are stable, but response fields may evolve. Watch the `updated` dates on each page and keep an eye on the changelog.

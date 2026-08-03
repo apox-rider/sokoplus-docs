@@ -1,0 +1,28 @@
+{
+  "badge": "Hati rasmi",
+  "title": "Kila unachohitaji kujua kuhusu SokoPlus",
+  "subtitle": "Mwongozo na nyaraka kwa wanunuzi, wauzaji, watoa huduma, washirika wa usafirishaji na waendelezaji wanaojenga kwenye SokoPlus.",
+  "ctaHelp": "Vinjari Kituo cha Usaidizi",
+  "ctaDevelopers": "Hati za Waendelezaji",
+  "popular": "Mada maarufu",
+  "popularSubtitle": "Nenda moja kwa moja kwenye mwongozo unaotembelewa zaidi.",
+  "sections": {
+    "help": {
+      "title": "Kituo cha Usaidizi",
+      "description": "Mwongozo wa hatua kwa hatua kwa kila jukumu kwenye jukwaa."
+    },
+    "developers": {
+      "title": "Hati za Waendelezaji",
+      "description": "Rejea la API, uthibitishaji, webhooks na mwongozo wa kuunganisha."
+    }
+  },
+  "mission": {
+    "title": "Kwa nini SokoPlus?",
+    "text": "SokoPlus ni jukwaa la biashara B2B/B2C lililoundwa kwa ajili ya Tanzania na Afrika Mashariki. Linaunganisha wanunuzi wa viwanda na wauzaji waliohakikiwa, watoa huduma na washirika wa usafirishaji katika mikoa yote 31 — huku wauzaji waliohakikiwa, uthibitishaji wa usafirishaji wa QR na usaidizi wa lugha mbili ukiwepo tangu mwanzo."
+  },
+  "stats": {
+    "regions": "Mikoa inayoshughulikiwa",
+    "languages": "Lugha",
+    "openSource": "Hati wazi"
+  }
+}

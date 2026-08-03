@@ -1,0 +1,70 @@
+---
+title: Watumiaji
+description: Rejea ya /api/users na /api/business — wasifu, anwani na usimamizi wa biashara.
+group: api
+order: 3
+updated: 2026-08-03
+---
+
+Endpoints za watumiaji na biashara zinasimamia wasifu na rekodi za biashara za muuzaji/mtoa huduma.
+
+## GET /users/me
+
+Wasifu wa mtumiaji wa sasa. **Uthibitishaji unahitajika.**
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "...",
+    "fullName": "Jane Doe",
+    "email": "you@example.com",
+    "role": "vendor",
+    "phoneNumber": "+255700000000",
+    "businessProfile": { "businessName": "Jane's Shop", "status": "APPROVED" },
+    "defaultAddress": { ... }
+  }
+}
+```
+
+## PUT /users/update
+
+Sasisha sehemu za jina, simu na anwani. Pia inasawazisha anwani ya msingi.
+
+## PUT /users/avatar
+
+Pakia picha mpya ya avatar (multipart). Inarudisha `avatarUrl` iliyosasishwa.
+
+## PUT /users/password
+
+```json
+{ "currentPassword": "old", "newPassword": "new" }
+```
+
+## DELETE /users/account
+
+Inafuta akaunti yako kwa upole.
+
+## PUT /users/change-role
+
+Badilisha jukumu la mtumiaji wa sasa (linalodhibitiwa na msimamizi).
+
+## Kumbukumbu za shughuli
+
+- `GET /users/activity-logs` — historia ya shughuli zako.
+- `GET /users/refer` — taarifa/kiungo cha referral.
+
+## Endpoints za biashara (`/api/business`)
+
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| GET | `/business/all` | Public | Biashara zilizoidhinishwa pamoja na idadi |
+| GET | `/business/:id` | Public | Maelezo ya biashara + bidhaa + huduma |
+| PUT | `/business/update` | vendor+ | Unda au sasisha wasifu wa biashara |
+| PUT | `/business/logo` | vendor+ | Pakia nembo (logo) |
+| PUT | `/business/cover` | vendor+ | Pakia picha ya jalada (cover) |
+| GET | `/business/verification-status` | vendor+ | Hali ya idhini ya moja kwa moja |
+
+<Callout type="note">
+Hali ya biashara lazima iwe `APPROVED` kabla ya mmiliki kuweza kuorodhesha bidhaa au huduma.
+</Callout>

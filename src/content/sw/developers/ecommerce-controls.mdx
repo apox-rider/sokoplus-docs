@@ -1,0 +1,65 @@
+---
+title: Swichi za vipengele (udhibiti wa ecommerce)
+description: Swichi za vipengele zinazoendeshwa na PlatformSetting ambazo huwezesha au kuzima uwezo wa jukwaa kote kwa ujumla.
+group: platform
+order: 2
+updated: 2026-08-03
+---
+
+SokoPlus inaweza kuzima vipengele vyote kwa wakati halisi (runtime) kwa kutumia **swichi za vipengele** zilizohifadhiwa kwenye `PlatformSetting` chini ya funguo kama `ecommerce:<feature>`.
+
+## Zinafanya kazi vipi
+
+- Kila swichi ina `enabled` na `message` ya hiari.
+- Middleware ya `featureEnabled(key)` inarudisha **503** pamoja na ujumbe kipengele kikiwa kimezimwa.
+- Swichi hudhibitiwa na `superAdmin` kupitia `GET/PUT /admin/ecommerce`.
+
+## Orodha ya swichi
+
+| Ufunguo | Hudhibiti |
+|-----|----------|
+| `registration` | Usajili wa watumiaji wapya |
+| `vendor_signup` | Usajili wa wauzaji |
+| `service_provider_signup` | Usajili wa watoa huduma |
+| `ordering` | Kuweka maagizo |
+| `checkout` | Mchakato wa malipo (checkout) |
+| `product_listing` | Kuorodhesha bidhaa |
+| `service_listing` | Kuorodhesha huduma |
+| `wishlist` | Orodha ya matamanio |
+| `reviews` | Maoni |
+| `messaging` | Ujumbe |
+| `notifications` | Arifa |
+| `discounts_enabled` | Punguzo kwenye bidhaa |
+| `featured_products` | Bidhaa zilizoangaziwa |
+| `vendor_verification` | Kuhitaji uthibitishaji wa muuzaji |
+| `commission` | Ufuatiliaji wa komisheni |
+| `refunds` | Kurudishiwa fedha |
+| `maintenance_mode` | Hali ya matengenezo |
+| `god_mode` | Uepukaji wa msimamizi mkuu |
+| `payment_service` | Usindikaji wa malipo |
+| `subscriptions` | Usajili wa mwezi wa wauzaji |
+| `boosts` | Kukuza tangazo la bidhaa/huduma |
+| `flash_sales` | Mauzo ya haraka (flash sales) |
+| `coupons` | Kuponi |
+| `referral_credits` | Marejeleo na mikopo ya salio |
+
+## Hadhira
+
+| Hadhira | Inaarifiwa wakati wa kuwasha/zima |
+|----------|--------------------|
+| `all` | Watumiaji wote |
+| `businesses` | Wauzaji + watoa huduma |
+| `none` | Hakuna (kimya) |
+
+## Mfano
+
+```bash
+# Zima uwekaji wa maagizo kote kwenye jukwaa
+curl -X PUT https://api.sokopluss.co.tz/api/admin/ecommerce/ordering \
+  -H "Authorization: Bearer <superadmin-token>" \
+  -d '{"enabled": false, "message": "Ordering is temporarily paused."}'
+```
+
+<Callout type="warning">
+Kubadilisha `maintenance_mode` au `payment_service` kunaweza kuzuia shughuli halisi za watumiaji. Tumia kwa uangalifu mkubwa.
+</Callout>

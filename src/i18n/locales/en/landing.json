@@ -1,0 +1,28 @@
+{
+  "badge": "Official documentation",
+  "title": "Everything you need to know about SokoPlus",
+  "subtitle": "Guides and reference material for buyers, vendors, service providers, delivery partners and developers building on SokoPlus.",
+  "ctaHelp": "Browse Help Centre",
+  "ctaDevelopers": "Developer Docs",
+  "popular": "Popular topics",
+  "popularSubtitle": "Jump straight into the most-visited guides.",
+  "sections": {
+    "help": {
+      "title": "Help Centre",
+      "description": "Step-by-step guides for every role on the platform."
+    },
+    "developers": {
+      "title": "Developer Docs",
+      "description": "API reference, authentication, webhooks and integration guides."
+    }
+  },
+  "mission": {
+    "title": "Why SokoPlus?",
+    "text": "SokoPlus is a B2B/B2C marketplace purpose-built for Tanzania and East Africa. It connects industrial buyers with verified vendors, service providers and delivery partners across all 31 regions — with verified sellers, QR-coded delivery verification and bilingual support from day one."
+  },
+  "stats": {
+    "regions": "Regions covered",
+    "languages": "Languages",
+    "openSource": "Open documentation"
+  }
+}

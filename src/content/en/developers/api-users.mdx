@@ -1,0 +1,70 @@
+---
+title: Users
+description: Reference for /api/users and /api/business — profiles, addresses, and business management.
+group: api
+order: 3
+updated: 2026-08-03
+---
+
+User and business endpoints manage profiles and the vendor/provider business records.
+
+## GET /users/me
+
+Current user profile. **Auth required.**
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "...",
+    "fullName": "Jane Doe",
+    "email": "you@example.com",
+    "role": "vendor",
+    "phoneNumber": "+255700000000",
+    "businessProfile": { "businessName": "Jane's Shop", "status": "APPROVED" },
+    "defaultAddress": { ... }
+  }
+}
+```
+
+## PUT /users/update
+
+Update name, phone, address fields. Also syncs the default address.
+
+## PUT /users/avatar
+
+Upload a new avatar image (multipart). Returns the updated `avatarUrl`.
+
+## PUT /users/password
+
+```json
+{ "currentPassword": "old", "newPassword": "new" }
+```
+
+## DELETE /users/account
+
+Soft-deletes your own account.
+
+## PUT /users/change-role
+
+Change the current user's role (admin-gated).
+
+## Activity logs
+
+- `GET /users/activity-logs` — your activity history.
+- `GET /users/refer` — referral info / link.
+
+## Business endpoints (`/api/business`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/business/all` | Public | Approved businesses with counts |
+| GET | `/business/:id` | Public | Business detail + products + services |
+| PUT | `/business/update` | vendor+ | Upsert business profile |
+| PUT | `/business/logo` | vendor+ | Upload logo |
+| PUT | `/business/cover` | vendor+ | Upload cover image |
+| GET | `/business/verification-status` | vendor+ | Live approval status |
+
+<Callout type="note">
+Business status must be `APPROVED` before the owner can list products or services.
+</Callout>

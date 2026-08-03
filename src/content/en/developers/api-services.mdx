@@ -1,0 +1,61 @@
+---
+title: Services
+description: Reference for /api/services — service listings, CRUD and approval.
+group: api
+order: 5
+updated: 2026-08-03
+---
+
+Services are professional offerings from service providers.
+
+## GET /services/all
+
+Public service listing. Optional `category` filter.
+
+## GET /services/:id
+
+Single service detail.
+
+## Service object (key fields)
+
+```json
+{
+  "id": "...",
+  "title": "Plumbing repair",
+  "description": "...",
+  "basePrice": 30000,
+  "bannerImage": "https://.../banner.jpg",
+  "adTier": "basic",
+  "status": "approved",
+  "providerId": "...",
+  "categoryId": "..."
+}
+```
+
+## Provider endpoints
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/services/add` | service_provider | Create service |
+| GET | `/services/my` | service_provider | Your services |
+| PUT | `/services/:id` | service_provider | Update service |
+| DELETE | `/services/:id` | service_provider+ | Soft-delete service |
+| GET | `/services/:id/related` | Public | Up to 6 related services |
+
+## Admin approval
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| PUT | `/services/:id/approve` | partnerAdmin+ | Approve service |
+| PUT | `/services/:id/reject` | partnerAdmin+ | Reject service |
+
+## Boosts & bookings
+
+- `POST /services/boosts` — purchase a service boost.
+- `GET /services/boosts` — list boosts.
+- `GET /services/popular` / `in-demand` — popularity feeds.
+- Bookings live under [`/api/bookings`](/en/developers/api-orders).
+
+<Callout type="note">
+Service providers can also sell physical products using the product endpoints with the same business approval requirement.
+</Callout>

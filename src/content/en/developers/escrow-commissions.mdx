@@ -1,0 +1,60 @@
+---
+title: Escrow & commissions
+description: How escrow protects transactions and how platform commissions are tracked.
+group: payments
+order: 4
+updated: 2026-08-03
+---
+
+Two mechanisms keep money movement fair: **escrow** and **commissions**.
+
+## Escrow (`/api/escrow`)
+
+Escrow holds funds until delivery is confirmed.
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/escrow/status/:orderId` | JWT | Escrow status for an order |
+| POST | `/escrow/initiate-release` | admin | Release funds to vendor |
+| POST | `/escrow/initiate-refund` | admin | Return funds to buyer |
+| POST | `/escrow/confirm` | admin | Confirm a release/refund |
+| POST | `/escrow/process-expired` | superAdmin | Sweep expired escrows |
+
+### Escrow lifecycle
+
+1. **Created** — when the order payment webhook is confirmed.
+2. **Held** — funds sit until the order is delivered and confirmed.
+3. **Released** — funds go to the vendor after receipt confirmation.
+4. **Refunded** — funds return to the buyer when a refund is approved.
+
+## Commissions
+
+The platform charges a commission on orders (tracked on the `Commission` model).
+
+| Field | Description |
+|-------|-------------|
+| `businessId` | The vendor receiving the order |
+| `orderId` | Related order |
+| `amount` | Commission amount |
+| `rate` | Commission rate |
+| `status` | Pending / paid |
+
+- Commissions are listed under `GET /admin/commissions` (superAdmin).
+- Mark as paid via `PUT /admin/commissions/:id/pay`.
+
+<Callout type="note">
+Commission tracking can be enabled or disabled via the `commission` feature flag.
+</Callout>
+
+## The full money flow
+
+```text
+Buyer pays ──▶ Escrow held ──▶ Delivery confirmed ──▶ Released to vendor
+                                     │
+                                     └──▶ Commission recorded ──▶ Paid out
+```
+
+## Next
+
+- See [Payments overview](/en/developers/payments-overview).
+- See [Feature flags](/en/developers/ecommerce-controls) for commission controls.

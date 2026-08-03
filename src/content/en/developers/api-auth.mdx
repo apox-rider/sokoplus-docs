@@ -1,0 +1,74 @@
+---
+title: Auth endpoints
+description: Reference for /api/auth — registration, login, OTP, password reset and profile.
+group: api
+order: 2
+updated: 2026-08-03
+---
+
+All auth endpoints live under `/api/auth`.
+
+## POST /auth/signup
+
+Register a new user. Sends an OTP to the given email/phone.
+
+```json
+{
+  "email": "you@example.com",
+  "password": "secret",
+  "fullName": "Jane Doe",
+  "phoneNumber": "+255700000000",
+  "role": "client"
+}
+```
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `email` | yes | Valid email |
+| `password` | yes | Min 6 chars |
+| `fullName` | yes | Full name |
+| `phoneNumber` | yes | For OTP |
+| `role` | no | `client` default; `vendor`/`service_provider` start pending |
+
+## POST /auth/login
+
+Email + password login. Returns `data.token`.
+
+## POST /auth/otp/verify
+
+```json
+{ "code": "123456", "email": "you@example.com", "phoneNumber": "+255700000000" }
+```
+
+Returns a JWT when the code is verified.
+
+## POST /auth/me
+
+`GET` current user profile including `businessProfile` and default address. **Auth required.**
+
+## Password recovery
+
+| Endpoint | Body | Purpose |
+|----------|------|---------|
+| `POST /auth/forgot-password/send` | `{ "email" }` | Send reset OTP |
+| `POST /auth/forgot-password/verify` | `{ "code", "email" }` | Verify reset code |
+| `POST /auth/forgot-password/reset` | `{ "email", "code", "password" }` | Set new password |
+
+## Google sign-in
+
+`POST /auth/google` with `{ "idToken" }` from the Google OAuth client. Returns a JWT.
+
+## Other endpoints
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/auth/otp/send` | — | Send a verification OTP |
+| POST | `/auth/otp/link` | JWT | Link a phone to the account |
+| POST | `/auth/logout` | JWT | Invalidate session |
+| POST | `/auth/refresh` | — | Refresh token |
+| POST | `/auth/check-exists` | — | Check user existence |
+| POST | `/auth/change-password` | JWT | Change password |
+
+<Callout type="note">
+Certain privileged endpoints (such as account impersonation) are reserved for platform administrators and are not documented publicly.
+</Callout>

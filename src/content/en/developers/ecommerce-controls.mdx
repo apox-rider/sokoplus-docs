@@ -1,0 +1,65 @@
+---
+title: Feature flags (ecommerce controls)
+description: The PlatformSetting-driven feature flags that enable or disable platform capabilities globally.
+group: platform
+order: 2
+updated: 2026-08-03
+---
+
+SokoPlus can disable whole features at runtime using **feature flags** stored in `PlatformSetting` under keys like `ecommerce:<feature>`.
+
+## How they work
+
+- Each flag has `enabled` and an optional `message`.
+- The `featureEnabled(key)` middleware returns **503** with the message when a feature is off.
+- Flags are managed by `superAdmin` via `GET/PUT /admin/ecommerce`.
+
+## Flag list
+
+| Key | Controls |
+|-----|----------|
+| `registration` | New user registration |
+| `vendor_signup` | Vendor registration |
+| `service_provider_signup` | Service provider registration |
+| `ordering` | Placing orders |
+| `checkout` | Checkout flow |
+| `product_listing` | Listing products |
+| `service_listing` | Listing services |
+| `wishlist` | Wishlist |
+| `reviews` | Reviews |
+| `messaging` | Messaging |
+| `notifications` | Notifications |
+| `discounts_enabled` | Discounts on products |
+| `featured_products` | Featured products |
+| `vendor_verification` | Require vendor verification |
+| `commission` | Commission tracking |
+| `refunds` | Refunds |
+| `maintenance_mode` | Maintenance mode |
+| `god_mode` | SuperAdmin bypass |
+| `payment_service` | Payment processing |
+| `subscriptions` | Vendor subscriptions |
+| `boosts` | Product/service boosts |
+| `flash_sales` | Flash sales |
+| `coupons` | Coupons |
+| `referral_credits` | Referrals & credits |
+
+## Audiences
+
+| Audience | Notified on toggle |
+|----------|--------------------|
+| `all` | All users |
+| `businesses` | Vendors + service providers |
+| `none` | Nobody (silent) |
+
+## Example
+
+```bash
+# Disable ordering platform-wide
+curl -X PUT https://api.sokopluss.co.tz/api/admin/ecommerce/ordering \
+  -H "Authorization: Bearer <superadmin-token>" \
+  -d '{"enabled": false, "message": "Ordering is temporarily paused."}'
+```
+
+<Callout type="warning">
+Toggling `maintenance_mode` or `payment_service` can block real user activity. Use with care.
+</Callout>

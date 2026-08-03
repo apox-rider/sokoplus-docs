@@ -1,0 +1,44 @@
+---
+title: Ujumuishaji wa ClickPesa
+description: Jinsi SokoPlus inavyojumuisha ClickPesa kwa malipo na utoaji wa malipo, ikijumuisha checksum ya HMAC.
+group: payments
+order: 2
+updated: 2026-08-03
+---
+
+SokoPlus inatumia **ClickPesa** kama lango lake la malipo (`https://api.clickpesa.com/third-parties`).
+
+## Siri za lango
+
+| Kigezo cha mazingira | Madhumuni |
+|----------------------|---------|
+| `CLICKPESA_CLIENT_ID` | Client ID ya lango |
+| `CLICKPESA_API_KEY` | API key |
+| `CLICKPESA_CHECKSUM_KEY` | Ufunguo wa kusaini HMAC |
+| `CLICKPESA_WEBHOOK_SECRET` | Uthibitishaji wa webhook |
+| `CLICKPESA_MODE` | `sandbox` au `production` |
+
+## Kuunda payment intent
+
+Backend inatengeneza mwili wa ombi uliosainiwa na kuiita API ya ClickPesa kuanzisha malipo ya agizo, usajili wa mwezi au kukuza tangazo. Mwili wa JSON wa canonical hutiwa saini kwa **HMAC-SHA256** kwa kutumia ufunguo wa checksum.
+
+## Uthibitishaji
+
+Webhooks na majibu yanayoingia huthibitishwa kwa kukokotoa upya HMAC juu ya mwili wa ombi la canonical na kulinganisha checksums. Ni callbacks zilizothibitishwa pekee zinazoaminika.
+
+## Utoaji wa malipo (kwa muuzaji)
+
+Utoaji wa malipo unafuata muundo huo huo: intent huundwa ukiwa na maelezo ya utoaji wa malipo ya muuzaji, na matokeo huthibitishwa kupitia webhook ya utoaji wa malipo.
+
+<Callout type="warning">
+Weka siri za `CLICKPESA_*` mbali na msimbo wa mteja na usiweke kwenye repositori za umma. Zinatakiwa kuwa kwenye vigezo vya mazingira vya seva pekee.
+</Callout>
+
+## Maelezo ya lango la sasa
+
+Kwa sasa jukwaa linaandika muamala na `gateway: 'other'` ndani huku likielekeza malipo kupitia ClickPesa. Ukisoma thamani za `PaymentGateway`, tarajia `'other'` siku hizi.
+
+## Endelea
+
+- Angalia [Webhooks](/sw/developers/webhooks) kwa mkataba wa callbacks.
+- Rejea kamili ya vigezo vya mazingira inapatikana kwa wasimamizi wa jukwaa pekee.

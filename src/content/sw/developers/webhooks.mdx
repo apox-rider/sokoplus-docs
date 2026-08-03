@@ -1,0 +1,58 @@
+---
+title: Webhooks
+description: Jinsi webhooks za malipo na utoaji wa malipo za ClickPesa zinavyofanya kazi, na jinsi backend inavyozithibitisha.
+group: payments
+order: 3
+updated: 2026-08-03
+---
+
+Webhooks ni njia ya lango kuiambia backend kwamba malipo au utoaji wa malipo umekamilika. Ni **endpoints za HTTP zisizohitaji uthibitishaji** ambazo zinalindwa badala yake kwa uthibitishaji wa checksum.
+
+## Endpoints
+
+| Endpoint | Madhumuni |
+|----------|---------|
+| `POST /api/clickpesa/payment` | Matokeo ya malipo |
+| `POST /api/clickpesa/payout` | Matokeo ya utoaji wa malipo |
+
+## Mtiririko wa uthibitishaji
+
+1. ClickPesa hutuma mwili wa JSON pamoja na checksum.
+2. Backend huhesabu upya sahihi ya **HMAC-SHA256** kwenye mwili wa canonical kwa kutumia `CLICKPESA_CHECKSUM_KEY`.
+3. Ikiwa checksum zinalingana, tukio linachakatwa.
+4. Vinginevyo, webhook hukataliwa.
+
+<CodeBlock title="Pseudocode">
+```js
+const expected = hmacSHA256(canonicalJson(body), CHECKSUM_KEY)
+if (headerChecksum !== expected) return res.status(401).end()
+```
+</CodeBlock>
+
+## Athari za webhook ya malipo
+
+Kwa malipo yaliyothibitishwa:
+
+- `Transaction` inasasishwa (hali, hali ya malipo, marejeleo).
+- **Agizo** linalohusika linasasishwa.
+- Rekodi ya **escrow** inaundwa kwa agizo.
+- Usajili wa mwezi / kukuza tangazo la huduma huamilishwa malipo yakifika.
+- Mtumiaji anaarifiwa kupitia socket.io / push.
+
+<Callout type="warning">
+Idempotency ni muhimu — shughulikia uwasilishaji wa webhook unaorudiwa kwa ustadi (mf. angalia hali ya shughuli kabla ya kuchakata tena).
+</Callout>
+
+## Kusanidi webhooks zako mwenyewe
+
+Muunganisho wako unapaswa:
+
+1. Kufungua URL ambayo ClickPesa inaweza kuifikia.
+2. Kuthibitisha checksum kwenye kila callback kabla ya kuiamini.
+3. Kujibu haraka (`2xx`) ili lango lisirudie tena.
+4. Kulinganisha na rekodi zako za shughuli.
+
+## Inayofuata
+
+- Angalia [Muunganisho wa ClickPesa](/sw/developers/clickpesa-integration).
+- Angalia [Hifadhi ya malipo na komisheni](/sw/developers/escrow-commissions) kwa kinachotokea baada ya malipo.

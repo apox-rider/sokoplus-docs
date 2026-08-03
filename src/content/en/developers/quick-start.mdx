@@ -1,0 +1,89 @@
+---
+title: Quick start
+description: The fastest path to a working SokoPlus API integration — base URL, auth, first requests.
+group: overview
+order: 2
+updated: 2026-08-03
+---
+
+Here's the fastest path to making your first authenticated request.
+
+## 1. Get the base URL
+
+All API calls use:
+
+```text
+https://api.sokopluss.co.tz/api
+```
+
+## 2. Health check
+
+Confirm the API is reachable:
+
+```bash
+curl https://api.sokopluss.co.tz/api/health
+```
+
+<CodeBlock title="Response">
+```json
+{
+  "status": "ok",
+  "database": "connected"
+}
+```
+</CodeBlock>
+
+## 3. Register or log in
+
+To get a token, register a user and verify the OTP, or log in with an existing account:
+
+```bash
+curl -X POST https://api.sokopluss.co.tz/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "you@example.com", "password": "your-password"}'
+```
+
+<CodeBlock title="Response (truncated)">
+```json
+{
+  "status": "success",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIs..."
+  }
+}
+```
+</CodeBlock>
+
+## 4. Call an authenticated endpoint
+
+Send the token as a bearer header:
+
+```bash
+curl https://api.sokopluss.co.tz/api/user/profile \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."
+```
+
+## 5. Explore public endpoints
+
+No token needed for these:
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /products/all` | List products |
+| `GET /services/all` | List services |
+| `GET /business/all` | List verified businesses |
+| `GET /categories` | List categories |
+| `GET /explore` | Marketplace discovery |
+
+## Common headers
+
+| Header | Value | When |
+|--------|-------|------|
+| `Authorization` | `Bearer <jwt>` | All authenticated requests |
+| `Content-Type` | `application/json` | All JSON bodies |
+
+<Callout type="warning">
+Keep your JWT secret on the client secure. Do not expose tokens in public repositories.
+</Callout>
+
+Next step: understand how [authentication](/en/developers/authentication) works.

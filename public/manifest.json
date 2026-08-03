@@ -1,0 +1,21 @@
+{
+  "name": "SokoPlus Docs & Help Centre",
+  "short_name": "SokoPlus Docs",
+  "description": "Official documentation and help centre for the SokoPlus industrial commerce platform.",
+  "start_url": "/en",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#AA0014",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

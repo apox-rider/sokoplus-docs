@@ -1,0 +1,61 @@
+---
+title: Huduma
+description: Rejea ya /api/services — orodha za huduma, CRUD na uidhinishaji.
+group: api
+order: 5
+updated: 2026-08-03
+---
+
+Huduma ni matoleo ya kitaalamu yanayotolewa na watoa huduma.
+
+## GET /services/all
+
+Orodha ya huduma za umma. Kichujio cha `category` ni hiari.
+
+## GET /services/:id
+
+Maelezo ya huduma moja.
+
+## Muundo wa huduma (sehemu muhimu)
+
+```json
+{
+  "id": "...",
+  "title": "Plumbing repair",
+  "description": "...",
+  "basePrice": 30000,
+  "bannerImage": "https://.../banner.jpg",
+  "adTier": "basic",
+  "status": "approved",
+  "providerId": "...",
+  "categoryId": "..."
+}
+```
+
+## Endpoints za mtoa huduma
+
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| POST | `/services/add` | service_provider | Unda huduma |
+| GET | `/services/my` | service_provider | Huduma zako |
+| PUT | `/services/:id` | service_provider | Sasisha huduma |
+| DELETE | `/services/:id` | service_provider+ | Futa huduma kwa upole |
+| GET | `/services/:id/related` | Public | Hadi huduma 6 zinazohusiana |
+
+## Idhini ya msimamizi
+
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| PUT | `/services/:id/approve` | partnerAdmin+ | Idhinisha huduma |
+| PUT | `/services/:id/reject` | partnerAdmin+ | Kataa huduma |
+
+## Kukuza tangazo na kuhifadhi nafasi
+
+- `POST /services/boosts` — nunua kukuza tangazo la huduma.
+- `GET /services/boosts` — orodhesha matangazo yaliyokuzwa.
+- `GET /services/popular` / `in-demand` — orodha za umaarufu.
+- Kuhifadhi nafasi kiko chini ya [`/api/bookings`](/sw/developers/api-orders).
+
+<Callout type="note">
+Watoa huduma pia wanaweza kuuza bidhaa halisi kwa kutumia endpoints za bidhaa, wakifuata sharti lile lile la idhini ya biashara.
+</Callout>

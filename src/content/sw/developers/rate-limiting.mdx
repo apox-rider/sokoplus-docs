@@ -1,0 +1,57 @@
+---
+title: Kikomo cha maombi na usalama
+description: Kikomo cha maombi (rate limit) cha API, uthibitishaji wa data, na vichwa vya usalama vinavyowekwa na backend ya SokoPlus.
+group: authentication
+order: 3
+updated: 2026-08-03
+---
+
+Backend hutumia safu kadhaa za ulinzi kwa kila ombi.
+
+## Kikomo cha maombi (rate limit)
+
+Vikomo vya maombi hutumika kwa ujumla na kwenye njia nyeti:
+
+| Kizuia | Wigo | Kikomo |
+|---------|-------|-------|
+| `globalLimiter` | Maombi yote ya `/api/*` | 200 kwa dakika 15 |
+| `authLimiter` | Maombi yote ya `/api/auth/*` | 20 kwa dakika 15 |
+| `userStrictLimiter` | Maombi yasiyo ya GET | 30 kwa dakika |
+
+<CodeBlock title="429 response">
+```json
+{
+  "status": "error",
+  "message": "Too many requests, please try again later."
+}
+```
+</CodeBlock>
+
+<Callout type="tip">
+Heshimu vichwa vya `Retry-After` na ongeza muda polepole (exponential backoff) badala ya kurudia ombi mara moja.
+</Callout>
+
+## Uthibitishaji wa data
+
+- **Schemata za Zod** (kutoka kifurushi cha `@trustflow/shared`) huthibitisha miili ya maombi kwenye uendeshaji.
+- Minyororo ya awali ya `express-validator` bado ipo kwenye `src/middleware/validate.js`.
+- Data isiyo sahihi inarudisha `400 Bad Request` pamoja na makosa ya sehemu husika.
+
+## Vichwa vya usalama (Helmet)
+
+Helmet huweka vichwa ili kuzuia mashambulizi ya kawaida:
+
+- X-Content-Type-Options, X-Frame-Options, X-XSS-Protection
+- Strict-Transport-Security, mwongozo wa Content-Security-Policy
+- Referrer-Policy na Permissions-Policy
+
+## CORS
+
+Ni asili zilizoorodheshwa kwenye orodha nyeupe (kutoka `CORS_ORIGIN` / `CORS_ORIGIN2`) tu zinazoweza kupiga API kutoka kwa vivinjari. Kila kitu kingine kinazuiwa.
+
+## Ulinzi mwingine
+
+- **Usafishaji wa data** (input sanitization) — frontend huondoa HTML kutoka kwa data inayotoka.
+- **Ufutaji laini** (soft deletes) — vitendo vinavyoharibu huweka `deletedAt` badala ya kuondoa safu.
+- **Kumbukumbu za shughuli** (activity logging) — vitendo vya msimamizi vinarekodiwa kwa uthibitisho.
+- **Walinda vipengele** (feature guards) — vipengele vilivyozimwa hurudisha `503` na ujumbe unaoweza kubadilishwa.

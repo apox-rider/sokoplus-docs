@@ -1,0 +1,65 @@
+---
+title: Architecture overview
+description: How the SokoPlus frontend, backend, database and services fit together.
+group: overview
+order: 3
+updated: 2026-08-03
+---
+
+SokoPlus is a full-stack application split across a frontend SPA and a backend API.
+
+## System diagram
+
+```text
+┌──────────────┐      HTTPS      ┌──────────────────┐
+│   Frontend   │ ──────────────▶ │   Backend API    │
+│  React 19    │   JSON / JWT    │   Express 5      │
+│ TanStack SSR │ ◀────────────── │   (REST /api/*)  │
+└──────────────┘      JSON       └────────┬─────────┘
+                                          │
+                              ┌───────────┼───────────┐
+                              ▼           ▼           ▼
+                       ┌──────────┐ ┌──────────┐ ┌──────────┐
+                       │PostgreSQL│ │  Redis   │ │ClickPesa │
+                       │ (Prisma) │ │ (cache)  │ │ (payments)│
+                       └──────────┘ └──────────┘ └──────────┘
+```
+
+## Backend layout
+
+```
+src/
+├── app.js          # Entry: middleware pipeline, route mounting
+├── controllers/    # ~40 route handler modules
+├── routes/         # ~35 route definition files
+├── middleware/     # auth, validation, feature guards, rate limiting, errors
+├── lib/            # db, clickpesa, email, cloudinary, logger, socket, etc.
+└── services/       # escrow, commission, credit, referral, subscription, push
+```
+
+## Key design decisions
+
+- **Express 5 + plain JavaScript** — fast iteration, ESM throughout.
+- **Prisma 7 + PrismaPg adapter** — typed ORM over PostgreSQL, hot-reload safe singleton.
+- **Zod schemas** (shared package) — request validation on mutations.
+- **JWT + RBAC middleware** — `protect` + `authorize(...roles)` on every protected route.
+- **HMAC webhooks** — ClickPesa callbacks are checksum-verified, so payment events are trusted.
+- **Feature flags** — the `PlatformSetting` table (`ecommerce:<key>`) can disable features globally.
+
+## Frontend ↔ backend contract
+
+The frontend talks to the backend only through the REST API. There is no direct database access from the client. All communication is JSON over HTTPS.
+
+## Data flow example — placing an order
+
+1. Frontend adds items to the cart (`POST /cart/add`).
+2. Checkout (`POST /orders/checkout`) validates stock, delivery and working hours.
+3. Payment is initiated via ClickPesa (`POST /payments/initiate`).
+4. The ClickPesa webhook confirms the payment and updates the transaction.
+5. The order moves to **pending** and the vendor is notified.
+
+## Real-time
+
+- **socket.io** pushes live events (e.g. payment confirmations) to connected clients.
+- **Web push / Expo push** deliver notifications to browsers and devices.
+- The frontend also **polls** key resources as a fallback.

@@ -1,0 +1,41 @@
+---
+title: Utangulizi
+description: Muhtasari wa API ya jukwaa la SokoPlus — ni nini, teknolojia zinazotumika, na imekusudiwa nani.
+group: overview
+order: 1
+updated: 2026-08-03
+---
+
+Nyandiko hili linahusu jukwaa la SokoPlus: **API yake ya umma**, **mfano wa data**, na **dhana** za soko hili la kidijitali. Limekusudiwa wasanidi programu wanaojenga juu ya SokoPlus au kuunganisha mifumo yao wenyewe.
+
+## Jukwaa kwa mtazamo wa haraka
+
+- **Frontend:** React 19 + TanStack Start (SSR), Tailwind CSS v4, lugha mbili EN/SW
+- **Backend:** Node.js + Express 5 (ESM)
+- **Hifadhidata:** PostgreSQL 17 kupitia Prisma 7
+- **Uthibitishaji:** JWT (bearer) + OTP + Google OAuth, udhibiti wa ufikiaji kulingana na jukumu
+- **Malipo:** ClickPesa kwa webhooks zilizothibitishwa kwa HMAC
+- **Realtime:** socket.io + arifa za kusukuma (web-push + Expo)
+
+## API
+
+API ya REST imewekwa chini ya `/api`. Majibu yote ni JSON. Uendeshaji (mutations) kwa kawaida huhitaji uthibitishaji, na middleware ya majukumu hutekeleza nani anayeweza kupiga kila aina ya maombi.
+
+<Callout type="note">
+Katika nyandiko hili zima, base URL inaonyeshwa kama `https://api.sokopluss.co.tz/api`. Mazingira yako halisi yanaweza kutofautiana — angalia usanidi wa usambazaji wako.
+</Callout>
+
+## Utapata nini hapa
+
+| Sehemu | Yaliyomo |
+|---------|----------|
+| **Kuanza haraka** | Njia ya haraka zaidi ya kuwa na muunganisho unaofanya kazi |
+| **Uthibitishaji** | JWT, OTP, kuingia kwa Google, majukumu na ruhusa |
+| **Rejea ya API** | Nyandiko kwa kila endpoint, limetungwa kulingana na rasilimali |
+| **Malipo na webhooks** | ClickPesa, escrow, komisheni, uthibitishaji wa sahihi wa webhook |
+| **Dhana za jukwaa** | Mfano wa data, swichi za vipengele, arifa |
+| **Usambazaji** | Kuendesha backend, vigezo vya mazingira |
+
+## Kuhusu uthabiti
+
+Jukwaa linaendelea kusitawi kikamilifu. Njia za endpoint ni thabiti, lakini sehemu za majibu zinaweza kubadilika. Fuata tarehe za `updated` kwenye kila ukurasa na ufuatilie changelog.

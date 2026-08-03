@@ -1,0 +1,44 @@
+---
+title: ClickPesa integration
+description: How SokoPlus integrates ClickPesa for payments and payouts, including the HMAC checksum.
+group: payments
+order: 2
+updated: 2026-08-03
+---
+
+SokoPlus uses **ClickPesa** as its payment gateway (`https://api.clickpesa.com/third-parties`).
+
+## Gateway credentials
+
+| Environment variable | Purpose |
+|----------------------|---------|
+| `CLICKPESA_CLIENT_ID` | Gateway client ID |
+| `CLICKPESA_API_KEY` | API key |
+| `CLICKPESA_CHECKSUM_KEY` | HMAC signing key |
+| `CLICKPESA_WEBHOOK_SECRET` | Webhook verification |
+| `CLICKPESA_MODE` | `sandbox` or `production` |
+
+## Creating a payment intent
+
+The backend builds a signed request body and calls the ClickPesa API to initiate a payment for an order, subscription or boost. The canonical JSON body is signed with **HMAC-SHA256** using the checksum key.
+
+## Verification
+
+Incoming webhooks and responses are verified by recomputing the HMAC over the canonical request body and comparing checksums. Only verified callbacks are trusted.
+
+## Payouts
+
+Payouts follow the same pattern: an intent is created with the vendor's payout details, and the result is confirmed through the payout webhook.
+
+<Callout type="warning">
+Keep `CLICKPESA_*` secrets out of client code and out of public repositories. They belong only in server environment variables.
+</Callout>
+
+## Current gateway note
+
+The platform currently records transactions with `gateway: 'other'` internally while routing through ClickPesa. If you read `PaymentGateway` values, expect `'other'` today.
+
+## Next
+
+- See [Webhooks](/en/developers/webhooks) for the callback contract.
+- The full environment-variable reference is available to platform admins only.

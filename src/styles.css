@@ -1,0 +1,239 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  --color-brand: #aa0014;
+  --color-brand-hover: #cc0018;
+  --color-brand-soft: rgba(170, 0, 20, 0.08);
+  --color-shop-accent: #eb6749;
+  --color-surface: #ffffff;
+  --color-surface-dim: #f8fafc;
+  --color-surface-container: #f1f5f9;
+  --color-surface-high: #e2e8f0;
+  --color-on-surface: #000000;
+  --color-on-surface-variant: #475569;
+  --color-on-surface-muted: #94a3b8;
+  --color-line: #e2e8f0;
+  --color-line-strong: #cbd5e1;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Brand utilities (mirror sokoplus-site) ---- */
+.glass-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.glass-card-hover {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.glass-card-hover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(170, 0, 20, 0.35);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05), 0 12px 32px rgba(170, 0, 20, 0.12);
+}
+
+.cherry-glow {
+  box-shadow: 0 0 24px rgba(170, 0, 20, 0.25);
+}
+
+.cherry-text {
+  color: var(--color-brand);
+}
+
+.focus-ring-brand:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ---- Custom scrollbar ---- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+  border: 2px solid var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+::selection {
+  background: rgba(170, 0, 20, 0.9);
+  color: #fff;
+}
+
+/* ---- Code blocks ---- */
+.mdx-codeblock pre {
+  margin-top: 0;
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+pre {
+  border-radius: 12px;
+  border: 1px solid var(--color-line);
+  background: #f8fafc;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  -webkit-overflow-scrolling: touch;
+}
+
+pre code {
+  font-family: inherit;
+}
+
+:not(pre) > code {
+  background: var(--color-brand-soft);
+  color: var(--color-brand);
+  padding: 0.15rem 0.35rem;
+  border-radius: 6px;
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+/* ---- Doc prose ---- */
+.doc-prose h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 2.5rem 0 1rem;
+  letter-spacing: -0.01em;
+}
+
+.doc-prose h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 2rem 0 0.75rem;
+}
+
+.doc-prose h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.doc-prose p {
+  margin: 0.9rem 0;
+  line-height: 1.75;
+}
+
+.doc-prose ul,
+.doc-prose ol {
+  margin: 0.9rem 0;
+  padding-left: 1.5rem;
+}
+
+.doc-prose ul {
+  list-style: disc;
+}
+
+.doc-prose ol {
+  list-style: decimal;
+}
+
+.doc-prose li {
+  margin: 0.4rem 0;
+  line-height: 1.7;
+}
+
+.doc-prose li::marker {
+  color: var(--color-brand);
+}
+
+.doc-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.doc-prose thead th {
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-on-surface-variant);
+  padding: 0.6rem 0.75rem;
+  border-bottom: 2px solid var(--color-line-strong);
+  white-space: nowrap;
+}
+
+.doc-prose tbody td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--color-line);
+  vertical-align: top;
+}
+
+.doc-prose tbody tr:hover {
+  background: var(--color-surface-dim);
+}
+
+.doc-prose blockquote {
+  border-left: 4px solid var(--color-brand);
+  padding: 0.4rem 1rem;
+  margin: 1.25rem 0;
+  color: var(--color-on-surface-variant);
+  background: var(--color-brand-soft);
+  border-radius: 0 12px 12px 0;
+}
+
+.doc-prose hr {
+  border: none;
+  border-top: 1px solid var(--color-line);
+  margin: 2rem 0;
+}
+
+.doc-prose a {
+  color: var(--color-brand);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.doc-prose a:hover {
+  text-decoration-thickness: 2px;
+}

@@ -1,0 +1,84 @@
+---
+title: API conventions
+description: Base URL, response envelopes, error format, pagination and common patterns.
+group: api
+order: 1
+updated: 2026-08-03
+---
+
+Every endpoint in this reference follows the same conventions.
+
+## Base URL
+
+```text
+https://api.sokopluss.co.tz/api
+```
+
+## Response envelope
+
+Successful responses use a consistent envelope:
+
+<CodeBlock title="Success shape">
+```json
+{
+  "status": "success",
+  "data": { ... }
+}
+```
+</CodeBlock>
+
+Some endpoints return a top-level array or a flat object; check each endpoint's example.
+
+## Error format
+
+Errors always return a `4xx`/`5xx` status with:
+
+<CodeBlock title="Error shape">
+```json
+{
+  "status": "error",
+  "message": "Human-readable explanation",
+  "code": "OPTIONAL_MACHINE_CODE"
+}
+```
+</CodeBlock>
+
+| Status | Meaning |
+|--------|---------|
+| `400` | Bad request / validation failed |
+| `401` | Missing or invalid token |
+| `403` | Role not permitted |
+| `404` | Resource not found |
+| `429` | Rate limited |
+| `503` | Feature disabled (feature guard) |
+
+## Pagination
+
+List endpoints accept `page` and `limit` query params and return paginated data, e.g.:
+
+<CodeBlock title="Paginated shape">
+```json
+{
+  "status": "success",
+  "data": {
+    "items": [],
+    "page": 1,
+    "limit": 20,
+    "total": 143,
+    "totalPages": 8
+  }
+}
+```
+</CodeBlock>
+
+## Filtering & search
+
+Most list endpoints support `search`, `category`, `sort` and other filters via query params. The [global search](/en/developers/api-orders) endpoint exposes cross-entity search.
+
+## Soft deletes
+
+Resources marked with `deletedAt` are soft-deleted: they disappear from normal queries but remain in the database until permanently removed by an admin.
+
+## Date & time
+
+All timestamps are returned in **ISO 8601** UTC strings.
