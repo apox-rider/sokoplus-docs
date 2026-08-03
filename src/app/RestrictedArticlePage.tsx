@@ -70,7 +70,7 @@ export function RestrictedArticlePage() {
         <p className="mt-2 text-sm text-on-surface-variant">{message}</p>
         <Link
           to={`/${lang}/developers`}
-          className="mt-6 inline-flex rounded-lg bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-brand-hover"
+          className="mt-6 inline-flex rounded-lg bg-btn px-4 py-2 text-sm font-bold text-white hover:bg-btn-hover"
         >
           {t('backToDocs')}
         </Link>
@@ -88,7 +88,7 @@ export function RestrictedArticlePage() {
         <p className="mt-2 text-sm text-on-surface-variant">{message || t('articleNotFound')}</p>
         <Link
           to={`/${lang}/developers`}
-          className="mt-6 inline-flex rounded-lg bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-brand-hover"
+          className="mt-6 inline-flex rounded-lg bg-btn px-4 py-2 text-sm font-bold text-white hover:bg-btn-hover"
         >
           {t('backToDocs')}
         </Link>

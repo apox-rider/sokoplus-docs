@@ -127,7 +127,7 @@ export function RedeemPage() {
           <button
             type="submit"
             disabled={busy}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-btn px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-btn-hover disabled:cursor-not-allowed disabled:opacity-60"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ticket className="h-4 w-4" />}
             {busy ? t('redeeming') : t('redeem')}

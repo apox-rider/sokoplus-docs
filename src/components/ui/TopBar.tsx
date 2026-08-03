@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { GitBranch, LogOut, Menu, ShieldCheck, X } from 'lucide-react'
+import { GitBranch, ExternalLink, LogOut, Menu, ShieldCheck, X } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 import { SearchBox } from '@/components/ui/SearchBox'
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
@@ -12,6 +12,7 @@ import { clearRestrictedCache } from '@/lib/restricted'
 import type { Lang } from '@/i18n'
 
 const GITHUB_URL = 'https://github.com/apox-rider/sokoplus-docs'
+const SITE_URL = 'https://sokopluss.co.tz'
 
 export function TopBar({ lang }: { lang: Lang }) {
   const { t } = useTranslation('nav')
@@ -104,12 +105,15 @@ export function TopBar({ lang }: { lang: Lang }) {
               </button>
             </>
           ) : (
-            <Link
-              to={`/${lang}/redeem`}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-sm font-bold text-white transition-colors hover:bg-brand-hover"
+            <a
+              href={SITE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-on-surface-variant transition-colors hover:text-on-surface"
             >
-              {t('signIn')}
-            </Link>
+              {t('visitSite')}
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
           )}
           <button
             type="button"
@@ -170,13 +174,16 @@ export function TopBar({ lang }: { lang: Lang }) {
                 </button>
               </>
             ) : (
-              <Link
-                to={`/${lang}/redeem`}
+              <a
+                href={SITE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2 rounded-lg bg-brand px-3 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover"
+                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface-container"
               >
-                {t('signIn')}
-              </Link>
+                {t('visitSite')}
+                <ExternalLink className="h-4 w-4" />
+              </a>
             )}
             <a
               href={GITHUB_URL}

@@ -132,7 +132,7 @@ export function AdminTokensPage() {
             <button
               type="button"
               onClick={copyLink}
-              className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-brand-hover"
+              className="inline-flex items-center gap-2 rounded-lg bg-btn px-4 py-2 text-sm font-bold text-white hover:bg-btn-hover"
             >
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               {copied ? t('copied') : t('copyShareLink')}
@@ -206,7 +206,7 @@ export function AdminTokensPage() {
           <button
             type="submit"
             disabled={creating}
-            className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg bg-btn px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-btn-hover disabled:cursor-not-allowed disabled:opacity-60"
           >
             {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             {creating ? t('generating') : t('generateToken')}

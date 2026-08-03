@@ -67,8 +67,16 @@ export function Footer({ lang }: { lang: Lang }) {
         </div>
       </div>
 
-      <div className="border-t border-line py-5 text-center text-xs text-on-surface-muted">
-        © {new Date().getFullYear()} SokoPlus. {t('copyright')}
+      <div className="flex flex-col items-center justify-center gap-1.5 border-t border-line py-5 text-center text-xs text-on-surface-muted">
+        <p>
+          © {new Date().getFullYear()} SokoPlus. {t('copyright')}
+        </p>
+        <Link
+          to={`/${lang}/redeem`}
+          className="text-on-surface-muted/80 transition-colors hover:text-on-surface-variant"
+        >
+          {t('docsAdmin')}
+        </Link>
       </div>
     </footer>
   )

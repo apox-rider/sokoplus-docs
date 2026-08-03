@@ -6,6 +6,9 @@
   --color-brand: #aa0014;
   --color-brand-hover: #cc0018;
   --color-brand-soft: rgba(170, 0, 20, 0.08);
+  --color-btn: #f27457;
+  --color-btn-hover: #d65e40;
+  --color-btn-soft: rgba(242, 116, 87, 0.14);
   --color-shop-accent: #eb6749;
   --color-surface: #ffffff;
   --color-surface-dim: #f8fafc;

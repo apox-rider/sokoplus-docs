@@ -36,7 +36,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
           className={cn(
             'rounded-md px-2 py-1 text-xs font-bold transition-colors',
             current.startsWith(l.code)
-              ? 'bg-brand text-white'
+              ? 'bg-btn text-white'
               : 'text-on-surface-variant hover:text-on-surface',
           )}
         >

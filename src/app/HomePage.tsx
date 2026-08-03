@@ -55,7 +55,7 @@ export function HomePage() {
           <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <Link
               to={`/${lang}/help`}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-brand-hover focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:outline-none"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-btn px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-btn-hover focus-visible:ring-2 focus-visible:ring-btn/40 focus-visible:outline-none"
             >
               {t('landing:ctaHelp')}
               <ArrowRight className="h-4 w-4" />

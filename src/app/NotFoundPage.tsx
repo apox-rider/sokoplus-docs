@@ -14,7 +14,7 @@ export function NotFoundPage() {
       <p className="mt-2 text-on-surface-variant">{t('notFound.message')}</p>
       <Link
         to="/en"
-        className="mt-8 inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-hover"
+        className="mt-8 inline-flex items-center gap-2 rounded-lg bg-btn px-6 py-3 font-semibold text-white transition-colors hover:bg-btn-hover"
       >
         {t('notFound.backHome')}
       </Link>
