@@ -7,7 +7,6 @@ import {
   Globe2,
   Languages,
   MapPin,
-  Sparkles,
 } from 'lucide-react'
 import { getArticles } from '@/lib/content'
 import { usePageMeta } from '@/lib/seo'

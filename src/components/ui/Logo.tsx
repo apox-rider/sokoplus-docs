@@ -1,6 +1,6 @@
 import { cn } from '@/lib/cn'
 
-export function Logo({ className, withText = true }: { className?: string; withText?: boolean }) {
+export function Logo({ className }: { className?: string }) {
   return (
     <div className={cn('flex items-center gap-2', className)}>
       <img
@@ -10,11 +10,6 @@ export function Logo({ className, withText = true }: { className?: string; withT
         alt="SokoPlus logo"
         className="object-contain"
       />
-      {/* {withText && (
-        <span className="text-lg font-black tracking-tight text-shop-accent">
-          .docs
-        </span>
-      )} */}
     </div>
   )
 }
