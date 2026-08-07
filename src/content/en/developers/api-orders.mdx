@@ -103,6 +103,21 @@ When the `payment_service` feature is **off**, online payments are disabled but 
 Multi-vendor orders generate one **recipient code per suborder**, verified against the matching business's share. `OrderItem` rows carry variant snapshots (`variantId`, `variantName`, `variantType`) plus `selectedSpecs`/`notes`.
 </Callout>
 
+### Admin order management
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/admin/orders` | admin | List all orders (region-scoped) |
+| PUT | `/admin/orders/:orderId/status` | admin+ (`manage_orders`) | Update status |
+| DELETE | `/admin/orders/:orderId` | **superAdmin** | Soft-delete an order |
+
+**`DELETE /admin/orders/:orderId`** performs a **soft delete**: the order is stamped with `deletedAt`/`deletedBy` and immediately disappears from every order query (admin list, vendor list, customer list, and public tracking). It is **not** permanently erased:
+
+- Deleting again (or any lookup of a soft-deleted id) returns `404`.
+- Soft-deleted orders appear under **Deleted Records** (`GET /admin/records`) and can be restored with `POST /admin/records/Order/:orderId/restore` or permanently removed with `DELETE /admin/records/Order/:orderId/nuke`.
+- Escrow, item, and financial history is preserved, so deletion does not corrupt audit or payout records.
+- A successful response is `200` with `{ "message": "Order deleted successfully", "orderId", "orderCode" }`.
+
 ## Bookings (`/api/bookings`)
 
 | Method | Path | Auth | Description |
