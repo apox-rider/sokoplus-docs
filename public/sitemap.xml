@@ -5,10 +5,13 @@
   <url><loc>https://docs.sokopluss.co.tz/sw</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/en/developers/api-auth</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/en/developers/api-conventions</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://docs.sokopluss.co.tz/en/developers/api-flash-sales</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/en/developers/api-notifications</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/en/developers/api-orders</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/en/developers/api-products</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://docs.sokopluss.co.tz/en/developers/api-referrals</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/en/developers/api-services</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://docs.sokopluss.co.tz/en/developers/api-subscriptions</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/en/developers/api-users</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/en/developers/architecture</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/en/developers/authentication</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
@@ -52,10 +55,13 @@
   <url><loc>https://docs.sokopluss.co.tz/en/help/working-hours</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/sw/developers/api-auth</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/sw/developers/api-conventions</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://docs.sokopluss.co.tz/sw/developers/api-flash-sales</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/sw/developers/api-notifications</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/sw/developers/api-orders</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/sw/developers/api-products</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://docs.sokopluss.co.tz/sw/developers/api-referrals</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/sw/developers/api-services</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://docs.sokopluss.co.tz/sw/developers/api-subscriptions</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/sw/developers/api-users</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/sw/developers/architecture</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://docs.sokopluss.co.tz/sw/developers/authentication</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>

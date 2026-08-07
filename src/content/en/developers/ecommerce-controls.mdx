@@ -3,7 +3,7 @@ title: Feature flags (ecommerce controls)
 description: The PlatformSetting-driven feature flags that enable or disable platform capabilities globally.
 group: platform
 order: 2
-updated: 2026-08-03
+updated: 2026-08-07
 ---
 
 SokoPlus can disable whole features at runtime using **feature flags** stored in `PlatformSetting` under keys like `ecommerce:<feature>`.
@@ -11,37 +11,58 @@ SokoPlus can disable whole features at runtime using **feature flags** stored in
 ## How they work
 
 - Each flag has `enabled` and an optional `message`.
-- The `featureEnabled(key)` middleware returns **503** with the message when a feature is off.
-- Flags are managed by `superAdmin` via `GET/PUT /admin/ecommerce`.
+- The `featureEnabled(key)` middleware returns **503** with `{ message, feature, enabled: false }` when a feature is off. `god_mode` bypasses every guard; `maintenance_mode` is applied app-wide but exempts `/api/auth`, `/api/admin` and `/health`.
+- Flags are managed by `superAdmin` via `GET /admin/ecommerce` (list all) and `GET/PUT /admin/ecommerce/:id` (read/toggle one). The public `GET /admin/ecommerce/public` exposes the same list without admin auth (no `message`).
 
 ## Flag list
 
-| Key | Controls |
-|-----|----------|
-| `registration` | New user registration |
-| `vendor_signup` | Vendor registration |
-| `service_provider_signup` | Service provider registration |
-| `ordering` | Placing orders |
-| `checkout` | Checkout flow |
-| `product_listing` | Listing products |
-| `service_listing` | Listing services |
-| `wishlist` | Wishlist |
-| `reviews` | Reviews |
-| `messaging` | Messaging |
-| `notifications` | Notifications |
-| `discounts_enabled` | Discounts on products |
-| `featured_products` | Featured products |
-| `vendor_verification` | Require vendor verification |
-| `commission` | Commission tracking |
-| `refunds` | Refunds |
-| `maintenance_mode` | Maintenance mode |
-| `god_mode` | SuperAdmin bypass |
-| `payment_service` | Payment processing |
-| `subscriptions` | Vendor subscriptions |
-| `boosts` | Product/service boosts |
-| `flash_sales` | Flash sales |
-| `coupons` | Coupons |
-| `referral_credits` | Referrals & credits |
+| Key | Controls | Default |
+|-----|----------|---------|
+| `ordering` | Placing orders | enabled |
+| `registration` | New user registration | enabled |
+| `vendor_signup` | Vendor registration | enabled |
+| `service_provider_signup` | Service provider registration | enabled |
+| `product_listing` | Listing products | enabled |
+| `service_listing` | Listing services | enabled |
+| `checkout` | Checkout flow | enabled |
+| `wishlist` | Wishlist | enabled |
+| `reviews` | Reviews | enabled |
+| `vendor_verification` | Require vendor verification | enabled |
+| `commission` | Commission tracking | enabled |
+| `refunds` | Refunds | enabled |
+| `messaging` | Messaging | enabled |
+| `notifications` | Notifications | enabled |
+| `maintenance_mode` | Maintenance mode | disabled |
+| `featured_products` | Featured products | enabled |
+| `god_mode` | SuperAdmin bypass | disabled |
+| `payment_service` | Digital payment processing (ClickPesa) | disabled |
+| `subscription` | Vendor subscriptions | enabled |
+| `boosts` | Product/service boosts | enabled |
+| `flash_sales` | Flash sales | enabled |
+| `coupons` | Coupons | enabled |
+| `referral_credits` | Referrals & credits | enabled |
+
+The table follows `ECOMMERCE_CONTROLS` in `adminController.js`. There is no `discounts_enabled` control.
+
+## Server-side enforcement
+
+Most flags are also enforced in the route layer with `featureEnabled(...)`, so disabling a feature returns **503** from the API itself — not just a hidden UI element:
+
+- **`subscription`** — all `/api/subscriptions` endpoints (my, subscribe, cancel, upgrade, downgrade, all).
+- **`boosts`** — service boost listing and purchase (`GET /api/services/my/boosts`, `POST /api/services/boost`).
+- **`coupons`** — create, update, delete, list-mine, validate and apply (`/api/coupons/*`).
+- **`flash_sales`** — vendor join (`POST /api/flash-sales/join/:flashSaleId`).
+- **`referral_credits`** — referral endpoints (`/api/referrals/my`, `/api/referrals/stats`, `/api/referrals/code`, `/api/referrals/apply`) and credit endpoints (`/api/credits/my`, `/api/credits/history`, `/api/credits/redeem`).
+
+## Payment service off = Cash on Delivery
+
+`payment_service` is the master switch for **digital payments** only. When it is disabled:
+
+- **Online payments are off** — payment-gated money features (subscriptions, boosts, coupon redemption, payouts, credits) return `503` with `"Digital payments are currently offline. Cash on delivery only."`
+- **Ordering and checkout stay available** — `ordering` and `checkout` are independent flags. Checkout bypasses the payment-service gate so orders can still be placed.
+- Checkout returns `requiresPayment: false` and the order is placed as **Cash on Delivery**: the delivery agent collects on delivery, and escrow is still created (default) and released per suborder on verification.
+
+See [Orders, cart & bookings](./api-orders) for the checkout response shape.
 
 ## Audiences
 
@@ -61,5 +82,5 @@ curl -X PUT https://api.sokopluss.co.tz/api/admin/ecommerce/ordering \
 ```
 
 <Callout type="warning">
-Toggling `maintenance_mode` or `payment_service` can block real user activity. Use with care.
+Toggling `maintenance_mode` or `god_mode` can block real user activity. Disabling `payment_service` stops all online payments but keeps COD ordering available. Use with care.
 </Callout>

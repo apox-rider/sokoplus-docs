@@ -3,7 +3,7 @@ title: Data model
 description: The core Prisma models behind SokoPlus — users, commerce, money and operations.
 group: platform
 order: 1
-updated: 2026-08-03
+updated: 2026-08-07
 ---
 
 SokoPlus stores everything in **PostgreSQL** and models it with **Prisma**. This page covers the core models.
@@ -21,22 +21,26 @@ SokoPlus stores everything in **PostgreSQL** and models it with **Prisma**. This
 
 | Model | Purpose |
 |-------|---------|
-| `Product` (+ `ProductImage`) | Physical goods with price, stock, metrics, soft-delete |
+| `Product` | Physical goods with price, stock, metrics, soft-delete. Images live on the product as an `imageUrl` string array (no separate image model) |
+| `ProductVariant` / `WholesaleTier` / `ProductSpecification` | Product variants (type, name, price, stock, SKU), bulk-pricing tiers and spec key/value pairs |
 | `Service` | Professional services with base price |
-| `ProductCategory` / `ServiceCategory` | Hierarchical categories with icons |
-| `Order` / `OrderItem` | Orders with delivery data and a unique recipient ID |
-| `Cart` / `CartItem` | Shopping carts |
-| `Booking` | Service bookings |
+| `Category` | Single shared category tree for products and services (hierarchical via `parentId`, typed via `type`) |
+| `Order` / `OrderItem` / `OrderSuborder` | Orders split per business with per-suborder delivery data, recipient codes and QR payloads |
+| `CartItem` | Cart line items (product + optional variant). The cart itself is frontend-held |
+| `Booking` | Service bookings with accept/reject + booking code |
 
 ## Money
 
 | Model | Purpose |
 |-------|---------|
 | `Transaction` | Payment records (status, gateway) |
+| `PaymentMethod` | Saved payment instruments per user |
 | `Payout` | Vendor payouts |
 | `Escrow` | Held funds between payment and confirmation |
 | `Commission` | Platform commission per order |
+| `Refund` | Refund request linked to an order |
 | `Credit` / `CreditTransaction` | Referral/credit balances |
+| `VendorBalance` / `VendorBalanceLog` | Vendor earnings balance + ledger |
 | `Subscription` | Vendor tier plans |
 | `ServiceBoost` / `ProductBoost` | Promoted listings |
 | `Coupon` | Discount codes |
@@ -52,7 +56,7 @@ SokoPlus stores everything in **PostgreSQL** and models it with **Prisma**. This
 | `SupportTicket` | Customer support threads |
 | `CustomerReport` | Bug/complaint/feature reports |
 | `Feedback` / `Review` | Rated feedback with moderation |
-| `WebPushSubscription` | Browser push subscriptions |
+| `WebPushSubscription` | Browser push subscriptions — `id`, `userId`, `endpoint`, `p256dh`, `auth`, `createdAt`; one row per user+browser (`@@unique([userId, endpoint])`), cascade-deleted with the user |
 
 ## Operations
 
@@ -62,12 +66,42 @@ SokoPlus stores everything in **PostgreSQL** and models it with **Prisma**. This
 | `PlatformContent` | CMS pages (privacy, terms) |
 | `FAQ` | Frequently asked questions |
 | `ActivityLog` | Audit trail |
+| `AdminPermission` | Per-admin permission toggles |
 | `OtpCode` | One-time passwords |
 | `TokenBlacklist` | Revoked tokens |
-| `BannedIp` | Blocked IPs |
 | `WorkingHours` | Business schedules |
 | `DeliveryZone` | Delivery areas + fees |
 | `ShowcaseProject` | Promoted external projects |
+
+## Suborders
+
+An `Order` can contain items from several vendors in one checkout. At creation it is split into one `OrderSuborder` **per business**; each suborder owns its own fulfilment lifecycle:
+
+| Field | Purpose |
+|-------|---------|
+| `orderId` / `businessId` | Parent order and owning business |
+| `subtotal` | Sum of that business's items |
+| `status` | Own `OrderStatus` value per suborder |
+| `recipientCode` | Unique code for the 3-way delivery verification of this suborder |
+| `negotiatedAmount` / `collectedAmount` | Negotiated price and cash collected on handover |
+| `hasDelivery` / `deliveryCost` | Delivery flag + fee per suborder |
+| `deliveryPersonId` / `deliveryVerified` / `deliveryVerifiedAt` | Assignment + verified handover |
+| `deliveryLocation` / `deliveryLat` / `deliveryLng` | GPS handover point |
+| `cancelledAt` / `cancelReason` | When and why the suborder was cancelled |
+
+A single order may therefore show multiple statuses and recipient codes at once. The delivery QR payload encodes the suborder: `{ v:1, o:<suborderId>, r:<recipientCode>, s:1 }` — verify endpoints accept `suborderId` + `recipientId` to target the right suborder.
+
+Order-level fields also exist for legacy/single-vendor flows and order-wide accounting:
+
+| Field | Purpose |
+|-------|---------|
+| `deliveryVerified` / `recipientId` | Legacy single-vendor delivery verification |
+| `negotiatedAmount` / `collectedAmount` | Order-wide negotiated price and collected cash |
+| `cancelReason` | Why the order was cancelled |
+
+`OrderItem` rows snapshot the product at purchase time (`productId`, `productName`, `productPrice`, `quantity`, `imageUrl`) plus the selected variant (`variantId`, `variantName`, `variantType`) and any `selectedSpecs` / `notes`. Every item is linked to the owning suborder via `suborderId`.
+
+Endpoints that act on one business's share (`/orders/:id/status`, `/orders/:id/verify-recipient`, `/delivery/assign`, `/delivery/:id/verify`) accept an optional `suborderId` to target the correct suborder.
 
 ## Soft delete pattern
 
@@ -78,9 +112,16 @@ Most models have `deletedAt` + `deletedBy`. Deleting sets those fields; normal q
 | Enum | Values |
 |------|--------|
 | `Role` | `client`, `vendor`, `service_provider`, `delivery`, `partnerAdmin`, `majorAdmin`, `superAdmin` |
-| `BusinessStatus` | `APPROVED`, `PENDING`, `REJECTED`, `SUSPENDED` |
-| `OrderStatus` | `pending`, `confirmed`, `shipped`, `delivered`, `cancelled`, `returned` |
-| `TransactionStatus` / `PaymentStatus` | Status/state of money movement |
+| `PaymentStatus` | `unpaid`, `paid`, `refunded`, `partial` |
+| `TransactionStatus` | `pending`, `success`, `failed`, `refunded`, `held`, `released` |
+| `PayoutStatus` | `pending`, `processing`, `completed`, `failed` |
+| `PaymentGateway` | `selcom`, `stripe`, `tigo_pesa`, `mpesa`, `airtel_money`, `bank_transfer`, `clickpesa`, `other` |
+| `EscrowStatus` | `held`, `released`, `refunded`, `expired` |
+| `SubscriptionTier` | `free`, `pro`, `business`, `enterprise` |
+| `SubscriptionType` | `vendor`, `service_provider` |
+| `BoostType` | `pin`, `featured`, `spotlight` |
+
+Business and order statuses are **plain string fields**, not Prisma enums: `BusinessProfile.status` uses `APPROVED`, `PENDING`, `REJECTED`, `SUSPENDED`; `Order.status` and `OrderSuborder.status` use `pending`, `confirmed`, `shipped`, `delivered`, `cancelled` (`returned` is also accepted via the admin route).
 
 <Callout type="note">
 The exact Prisma schema lives in the backend repository under `prisma/schema.prisma` — treat this page as a summary.

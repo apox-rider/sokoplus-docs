@@ -1,0 +1,151 @@
+---
+title: Flash sales
+description: Reference for /api/flash-sales — active sales, vendor participation and superAdmin management.
+group: api
+order: 10
+updated: 2026-08-07
+---
+
+Flash sales give products discounted prices for a limited window. Vendors submit products for participation, which a superAdmin must approve before the product is discounted.
+
+## Flash sale shape
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `id` | string | UUID |
+| `name` | string | Sale name |
+| `description` | string? | Optional description |
+| `discountPercent` | int | Must be between `1` and `90` |
+| `startsAt` | string | ISO 8601, when the window opens |
+| `expiresAt` | string | ISO 8601, when the window closes |
+| `isActive` | bool | Default `true` |
+| `products` | json? | Optional product payload |
+| `deletedAt` | string? | Set on soft delete |
+
+## Participant status workflow
+
+Each participation has a `status`:
+
+`pending` → `approved` | `rejected`
+
+A vendor's `join` creates a `pending` participant. A superAdmin then approves or rejects it; only `approved` participants see the discounted price.
+
+## Endpoints
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/flash-sales/active` | Public | Currently active flash sales |
+| POST | `/flash-sales/join/:flashSaleId` | vendor | Submit a product for a flash sale |
+| GET | `/flash-sales/admin/list` | superAdmin | List flash sales |
+| POST | `/flash-sales/admin/create` | superAdmin | Create a flash sale |
+| PATCH | `/flash-sales/admin/:id` | superAdmin | Update a flash sale |
+| DELETE | `/flash-sales/admin/:id` | superAdmin | Soft-delete a flash sale |
+| PATCH | `/flash-sales/admin/participant/:id/approve` | superAdmin | Approve a participant |
+| PATCH | `/flash-sales/admin/participant/:id/reject` | superAdmin | Reject a participant |
+
+## GET /flash-sales/active
+
+Public. Returns the sales that are active, not deleted and currently within their window (`startsAt ≤ now ≤ expiresAt`), ordered by soonest expiry. Each sale includes a `participantsCount`.
+
+<CodeBlock title="Response">
+```json
+[
+  {
+    "id": "...",
+    "name": "Back to School",
+    "description": "School supplies at a discount",
+    "discountPercent": 25,
+    "startsAt": "2026-08-07T00:00:00.000Z",
+    "expiresAt": "2026-08-09T23:59:59.000Z",
+    "isActive": true,
+    "products": null,
+    "participantsCount": 4
+  }
+]
+```
+</CodeBlock>
+
+## POST /flash-sales/join/:flashSaleId
+
+Vendor submits one of their own products. Body:
+
+```json
+{ "productId": "..." }
+```
+
+`productId` is required. Returns `201` with the new participant in `pending` status.
+
+| Status | Condition |
+|--------|-----------|
+| `400` | No `productId`, sale not currently active, product already submitted, or tier participation cap reached |
+| `403` | Product does not belong to the vendor's business |
+| `404` | Flash sale or product not found |
+| `503` | `flash_sales` feature flag disabled |
+
+Participation is capped by the vendor's subscription tier, counting `pending` + `approved` participants:
+
+| Tier | Max active participations |
+|------|---------------------------|
+| `free` | 1 |
+| `pro` | 3 |
+| `business` | 5 |
+| `enterprise` | 10 |
+
+<Callout type="note">
+Joining a flash sale only creates a `pending` participation — a **superAdmin must approve** it before the product is included in the sale.
+</Callout>
+
+## Admin endpoints
+
+### POST /flash-sales/admin/create
+
+Body:
+
+```json
+{
+  "name": "Back to School",
+  "description": "School supplies at a discount",
+  "discountPercent": 25,
+  "startsAt": "2026-08-07T00:00:00.000Z",
+  "expiresAt": "2026-08-09T23:59:59.000Z"
+}
+```
+
+`name`, `discountPercent`, `startsAt` and `expiresAt` are required. `discountPercent` must be between `1` and `90` and `expiresAt` must be after `startsAt`. Returns `201` with the created sale.
+
+### GET /flash-sales/admin/list
+
+List sales with `page`/`limit` pagination. Filter with `status`:
+
+| `status` | Returns |
+|----------|---------|
+| `active` | Currently running sales |
+| `upcoming` | Sales that have not started |
+| `expired` | Sales past their `expiresAt` |
+| `inactive` | Sales with `isActive: false` |
+| *(omitted)* | All non-deleted sales |
+
+<CodeBlock title="Response">
+```json
+{
+  "flashSales": [ { "id": "...", "name": "Back to School", "_count": { "participants": 4 } } ],
+  "pagination": { "page": 1, "limit": 20, "total": 1, "totalPages": 1 }
+}
+```
+</CodeBlock>
+
+### PATCH /flash-sales/admin/:id
+
+Partially updates a sale. Any of `name`, `description`, `discountPercent`, `startsAt`, `expiresAt`, `isActive` (accepts boolean or `"true"`/`"false"` string). Returns `404` if the sale does not exist or is deleted.
+
+### DELETE /flash-sales/admin/:id
+
+Soft-deletes the sale (sets `deletedAt`/`deletedBy`; data is preserved). Returns `404` if not found or already deleted.
+
+### PATCH /flash-sales/admin/participant/:id/approve
+
+Approves a `pending` participant. Returns `400` if the participant is not pending, `404` if not found.
+
+### PATCH /flash-sales/admin/participant/:id/reject
+
+Rejects a `pending` participant. Same error behaviour as approve.

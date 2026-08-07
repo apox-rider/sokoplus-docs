@@ -3,7 +3,7 @@ title: Muundo wa data
 description: Modeli kuu za Prisma zinazounda SokoPlus — watumiaji, biashara, fedha na uendeshaji.
 group: platform
 order: 1
-updated: 2026-08-03
+updated: 2026-08-07
 ---
 
 SokoPlus huhifadhi kila kitu kwenye **PostgreSQL** na kuimodelisha kwa **Prisma**. Ukurasa huu unaelezea modeli kuu.
@@ -21,22 +21,26 @@ SokoPlus huhifadhi kila kitu kwenye **PostgreSQL** na kuimodelisha kwa **Prisma*
 
 | Model | Madhumuni |
 |-------|---------|
-| `Product` (+ `ProductImage`) | Vitu halisi vyenye bei, stock, vipimo na kufuta kwa upole |
+| `Product` | Vitu halisi vyenye bei, stock, vipimo na kufuta kwa upole. Picha huishi kwenye bidhaa yenyewe kama safu ya `imageUrl` (hakuna modeli tofauti ya picha) |
+| `ProductVariant` / `WholesaleTier` / `ProductSpecification` | Lahaja za bidhaa (type, name, price, stock, SKU), viwango vya bei ya jumla na sifa za key/value |
 | `Service` | Huduma za kitaalamu zenye bei ya msingi |
-| `ProductCategory` / `ServiceCategory` | Kategoria za ngazi (hierarchical) zenye icons |
-| `Order` / `OrderItem` | Maagizo yenye data ya usafirishaji na ID ya pekee ya mpokeaji |
-| `Cart` / `CartItem` | Rukoba za ununuzi |
-| `Booking` | Kuhifadhi nafasi za huduma |
+| `Category` | Mti mmoja wa kategoria ulioshirikiwa kwa bidhaa na huduma (ngazi kwa `parentId`, aina kwa `type`) |
+| `Order` / `OrderItem` / `OrderSuborder` | Maagizo yaliyogawanywa kwa biashara yenye data ya usafirishaji, misimbo ya mpokeaji na QR kwa kila suborder |
+| `CartItem` | Vipengee vya rukoba (bidhaa + lahaja ya hiari). Rukoba yenyewe huhifadhiwa upande wa mteja (frontend) |
+| `Booking` | Kuhifadhi nafasi za huduma na kukubali/kukataa + msimbo wa kuhifadhi nafasi |
 
 ## Fedha
 
 | Model | Madhumuni |
 |-------|---------|
 | `Transaction` | Rekodi za malipo (hali, gateway) |
+| `PaymentMethod` | Njia za malipo zilizohifadhiwa kwa kila mtumiaji |
 | `Payout` | Utoaji wa malipo kwa wauzaji |
 | `Escrow` | Fedha zilizohifadhiwa kati ya malipo na uthibitisho |
 | `Commission` | Komisheni ya jukwaa kwa kila agizo |
+| `Refund` | Ombi la kurudishiwa fedha linalounganishwa na agizo |
 | `Credit` / `CreditTransaction` | Salio za referral/mikopo ya salio |
+| `VendorBalance` / `VendorBalanceLog` | Salio la mapato ya muuzaji + leja (ledger) |
 | `Subscription` | Mipango ya viwango vya wauzaji |
 | `ServiceBoost` / `ProductBoost` | Orodha zilizokuzwa (matangazo) |
 | `Coupon` | Misimbo ya punguzo |
@@ -52,7 +56,7 @@ SokoPlus huhifadhi kila kitu kwenye **PostgreSQL** na kuimodelisha kwa **Prisma*
 | `SupportTicket` | Mijadala ya usaidizi wa wateja |
 | `CustomerReport` | Ripoti za bug/lalamiko/kipengele |
 | `Feedback` / `Review` | Maoni yenye tathmini na udhibiti wa maudhui |
-| `WebPushSubscription` | Usajili wa push kwenye vivinjari |
+| `WebPushSubscription` | Usajili wa push kwenye vivinjari — `id`, `userId`, `endpoint`, `p256dh`, `auth`, `createdAt`; safu moja kwa kila mtumiaji+kivinjari (`@@unique([userId, endpoint])`), inafutwa kwa cascade pamoja na mtumiaji |
 
 ## Uendeshaji
 
@@ -62,12 +66,42 @@ SokoPlus huhifadhi kila kitu kwenye **PostgreSQL** na kuimodelisha kwa **Prisma*
 | `PlatformContent` | Kurasa za CMS (faragha, sheria) |
 | `FAQ` | Maswali yanayoulizwa mara kwa mara |
 | `ActivityLog` | Rekodi ya ukaguzi (audit trail) |
+| `AdminPermission` | Vigezo vya ruhusa kwa kila msimamizi |
 | `OtpCode` | Nenosiri la wakati mmoja |
 | `TokenBlacklist` | Tokeni zilizobatilishwa |
-| `BannedIp` | IP zilizozuiwa |
 | `WorkingHours` | Ratiba za biashara |
 | `DeliveryZone` | Maeneo ya usafirishaji + ada |
 | `ShowcaseProject` | Miradi ya nje iliyokuzwa |
+
+## Suborders
+
+`Order` inaweza kuwa na vitu kutoka kwa wauzaji mbalimbali kwenye checkout moja. Wakati wa kuundwa, hugawanywa kuwa `OrderSuborder` moja **kwa kila biashara**; kila suborder ina mzunguko wake wa utekelezaji:
+
+| Sehemu | Madhumuni |
+|-------|---------|
+| `orderId` / `businessId` | Agizo la mzazi na biashara inayomiliki |
+| `subtotal` | Jumla ya vitu vya biashara hiyo |
+| `status` | Thamani yake ya `OrderStatus` kwa kila suborder |
+| `recipientCode` | Msimbo wa pekee wa uthibitishaji wa usafirishaji wa pande tatu kwa suborder hii |
+| `negotiatedAmount` / `collectedAmount` | Bei iliyojadiliwa na kiasi kilichokusanywa wakati wa kukabidhi |
+| `hasDelivery` / `deliveryCost` | Bendera ya usafirishaji + ada kwa kila suborder |
+| `deliveryPersonId` / `deliveryVerified` / `deliveryVerifiedAt` | Ugawaji + uthibitisho wa kukabidhiwa |
+| `deliveryLocation` / `deliveryLat` / `deliveryLng` | Sehemu ya GPS ya kukabidhi |
+| `cancelledAt` / `cancelReason` | Wakati na kwa nini suborder ilighairiwa |
+
+Agizo moja kwa hiyo linaweza kuonyesha hali nyingi na misimbo mingi ya mpokeaji kwa wakati mmoja. Payload ya QR ya usafirishaji inasimbua suborder: `{ v:1, o:<suborderId>, r:<recipientCode>, s:1 }` — endpoints za uthibitisho zinakubali `suborderId` + `recipientId` ili kulenga suborder sahihi.
+
+Sehemu za ngazi ya agizo pia zipo kwa ajili ya mtiririko wa zamani/wa muuzaji mmoja na uhasibu wa agizo lote:
+
+| Sehemu | Madhumuni |
+|-------|---------|
+| `deliveryVerified` / `recipientId` | Uthibitishaji wa zamani wa usafirishaji wa muuzaji mmoja |
+| `negotiatedAmount` / `collectedAmount` | Bei iliyojadiliwa na kiasi kilichokusanywa kwa agizo lote |
+| `cancelReason` | Kwa nini agizo liliighairiwa |
+
+Safu za `OrderItem` zinanakili bidhaa wakati wa ununuzi (`productId`, `productName`, `productPrice`, `quantity`, `imageUrl`) pamoja na lahaja iliyochaguliwa (`variantId`, `variantName`, `variantType`) na `selectedSpecs` / `notes`. Kila kipengee kinaunganishwa na suborder inayomiliki kupitia `suborderId`.
+
+Endpoints zinazofanya kazi kwenye sehemu ya biashara moja (`/orders/:id/status`, `/orders/:id/verify-recipient`, `/delivery/assign`, `/delivery/:id/verify`) zinakubali `suborderId` ya hiari ili kulenga suborder sahihi.
 
 ## Muundo wa kufuta kwa upole
 
@@ -78,9 +112,16 @@ Modeli nyingi zina `deletedAt` + `deletedBy`. Kufuta kunajaza sehemu hizo; queri
 | Enum | Thamani |
 |------|--------|
 | `Role` | `client`, `vendor`, `service_provider`, `delivery`, `partnerAdmin`, `majorAdmin`, `superAdmin` |
-| `BusinessStatus` | `APPROVED`, `PENDING`, `REJECTED`, `SUSPENDED` |
-| `OrderStatus` | `pending`, `confirmed`, `shipped`, `delivered`, `cancelled`, `returned` |
-| `TransactionStatus` / `PaymentStatus` | Hali ya mwendo wa fedha |
+| `PaymentStatus` | `unpaid`, `paid`, `refunded`, `partial` |
+| `TransactionStatus` | `pending`, `success`, `failed`, `refunded`, `held`, `released` |
+| `PayoutStatus` | `pending`, `processing`, `completed`, `failed` |
+| `PaymentGateway` | `selcom`, `stripe`, `tigo_pesa`, `mpesa`, `airtel_money`, `bank_transfer`, `clickpesa`, `other` |
+| `EscrowStatus` | `held`, `released`, `refunded`, `expired` |
+| `SubscriptionTier` | `free`, `pro`, `business`, `enterprise` |
+| `SubscriptionType` | `vendor`, `service_provider` |
+| `BoostType` | `pin`, `featured`, `spotlight` |
+
+Hali za biashara na maagizo ni **sehemu rahisi za aina ya string**, si enums za Prisma: `BusinessProfile.status` inatumia `APPROVED`, `PENDING`, `REJECTED`, `SUSPENDED`; `Order.status` na `OrderSuborder.status` zinatumia `pending`, `confirmed`, `shipped`, `delivered`, `cancelled` (`returned` pia inakubaliwa kupitia njia ya admin).
 
 <Callout type="note">
 Schema halisi ya Prisma iko kwenye repo ya backend chini ya `prisma/schema.prisma` — chukulia ukurasa huu kama muhtasari.

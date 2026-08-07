@@ -1,58 +1,136 @@
 ---
 title: Users
-description: Reference for /api/users and /api/business — profiles, addresses, and business management.
+description: Reference for /api/user and /api/business — profiles, addresses, and business management.
 group: api
 order: 3
-updated: 2026-08-03
+updated: 2026-08-07
 ---
 
-User and business endpoints manage profiles and the vendor/provider business records.
+User and business endpoints manage profiles and the vendor/provider business records. All user endpoints below require a JWT.
 
-## GET /users/me
+## GET /user/profile
 
 Current user profile. **Auth required.**
 
+Returns the user object as a **flat JSON body** (not wrapped in `{status, data}`) with `businessProfile` and the default address included.
+
+<CodeBlock title="Response">
 ```json
 {
-  "status": "success",
-  "data": {
-    "id": "...",
-    "fullName": "Jane Doe",
-    "email": "you@example.com",
-    "role": "vendor",
-    "phoneNumber": "+255700000000",
-    "businessProfile": { "businessName": "Jane's Shop", "status": "APPROVED" },
-    "defaultAddress": { ... }
-  }
+  "id": "...",
+  "fullName": "Jane Doe",
+  "email": "you@example.com",
+  "role": "vendor",
+  "phoneNumber": "+255700000000",
+  "avatarUrl": "...",
+  "businessProfile": { "businessName": "Jane's Shop", "status": "APPROVED" },
+  "addresses": [
+    { "id": "...", "label": "Home", "streetAddress": "...", "city": "...", "isDefault": true }
+  ]
 }
 ```
+</CodeBlock>
 
-## PUT /users/update
+## GET /auth/me
 
-Update name, phone, address fields. Also syncs the default address.
+Full "who am I" payload. **Auth required.** The richest current-user endpoint: it resolves `businessProfile` (including its `university` and `region`), the user's own `university`, `region`, `majorAdminRegion` and `adminPermissions`, and adds `selfieVerification` and `firstName`.
 
-## PUT /users/avatar
+<CodeBlock title="Response shape">
+```json
+{
+  "id": "...",
+  "fullName": "Jane Doe",
+  "role": "vendor",
+  "businessProfile": {
+    "businessName": "Jane's Shop",
+    "university": { "id": "...", "name": "..." },
+    "region": { "id": "...", "name": "..." }
+  },
+  "university": { "id": "...", "name": "..." },
+  "region": { "id": "...", "name": "..." },
+  "majorAdminRegion": { "region": { "id": "...", "name": "..." } },
+  "adminPermissions": [{ "permissionKey": "manage_orders", "enabled": true }],
+  "selfieVerification": { "status": "..." },
+  "firstName": "Jane"
+}
+```
+</CodeBlock>
 
-Upload a new avatar image (multipart). Returns the updated `avatarUrl`.
+## PUT /user/update
 
-## PUT /users/password
+Update name, phone and address fields. Also syncs the default address: it updates the existing default when one exists, or creates one labelled `Home` when `streetAddress` and `city` are both provided.
 
+<CodeBlock title="Request">
+```json
+{
+  "fullName": "Jane Doe",
+  "phoneNumber": "+255700000000",
+  "streetAddress": "123 Sam Nujoma Road",
+  "district": "Kinondoni",
+  "ward": "Mikocheni",
+  "city": "Dar es Salaam"
+}
+```
+</CodeBlock>
+
+## PUT /user/avatar
+
+Upload a new avatar image (multipart, field name `avatar`). Returns the updated `avatarUrl`.
+
+## PUT /user/password
+
+<CodeBlock title="Request">
 ```json
 { "currentPassword": "old", "newPassword": "new" }
 ```
+</CodeBlock>
 
-## DELETE /users/account
+Returns `401` with `Invalid current password` when the current password is wrong.
 
-Soft-deletes your own account.
+## Addresses (`/api/user/addresses`)
 
-## PUT /users/change-role
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/user/addresses` | JWT | List your addresses (soft-deleted excluded) |
+| POST | `/user/addresses` | JWT | Create an address (see body below) |
+| DELETE | `/user/addresses/:id` | JWT | Soft-delete an address |
 
-Change the current user's role (admin-gated).
+<CodeBlock title="POST /user/addresses">
+```json
+{
+  "label": "Home",
+  "streetAddress": "123 Sam Nujoma Road",
+  "city": "Dar es Salaam",
+  "district": "Kinondoni",
+  "ward": "Mikocheni",
+  "isDefault": true
+}
+```
+</CodeBlock>
 
-## Activity logs
+Setting `isDefault: true` clears `isDefault` on the user's other addresses.
 
-- `GET /users/activity-logs` — your activity history.
-- `GET /users/refer` — referral info / link.
+## Payment methods (`/api/user/payments`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/user/payments` | JWT | List saved payment methods |
+| POST | `/user/payments` | JWT | Save a payment method |
+
+<CodeBlock title="POST /user/payments">
+```json
+{ "type": "mobile_money", "provider": "M-Pesa", "accountNumber": "+255700000000", "isDefault": true }
+```
+</CodeBlock>
+
+## DELETE /user/account
+
+Soft-deletes your own account: sets `deletedAt` while preserving the data in records. **Auth required.**
+
+## Role changes & activity logs
+
+- `PUT /users/change-role` and `GET /users/activity-logs` **do not exist**. Role changes are performed by admins only via `PUT /admin/users/:userId/role` (protected by `partnerAdmin`/`majorAdmin`/`superAdmin` and scoped to region). Activity logs are admin-only via `GET /admin/activity`.
+- Referral info lives in the [referrals API](./api-referrals): `GET /referrals/my`, `GET /referrals/code` and `POST /referrals/apply`.
 
 ## Business endpoints (`/api/business`)
 

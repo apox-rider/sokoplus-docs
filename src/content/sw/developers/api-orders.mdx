@@ -3,7 +3,7 @@ title: Maagizo, rukoba ya ununuzi na kuhifadhi nafasi
 description: Rejea ya /api/orders, /api/cart na /api/bookings — malipo ya agizo, utekelezaji na usafirishaji.
 group: api
 order: 6
-updated: 2026-08-03
+updated: 2026-08-07
 ---
 
 Maagizo, rukoba ya ununuzi na kuhifadhi nafasi vinahusika na mzunguko wa ununuzi.
@@ -18,37 +18,89 @@ Maagizo, rukoba ya ununuzi na kuhifadhi nafasi vinahusika na mzunguko wa ununuzi
 | DELETE | `/cart/:id` | JWT | Ondoa bidhaa |
 | POST | `/cart/clear` | JWT | Futa rukoba |
 
-Kuongeza kwenye rukoba kunapandisha `addToCartCount` ya bidhaa.
+<Callout type="note">
+Endpoints za `/api/cart` kwa sasa zimezimwa (frozen) — router haujafungwa kwenye `app.js` (rukoba huhifadhiwa upande wa mteja). Checkout inayohitaji akaunti bado inasoma vipengee kutoka kwenye jedwali la `CartItem`. Angalia [data model](./data-model).
+</Callout>
 
 ## Maagizo (`/api/orders`)
 
 | Method | Path | Auth | Maelezo |
 |--------|------|------|-------------|
-| POST | `/orders/checkout` | JWT | Unda agizo kutoka kwenye rukoba (payment intent) |
+| POST | `/orders/checkout` | JWT | Unda agizo kutoka kwenye rukoba (COD wakati `payment_service` ikiwa imezimwa) |
+| POST | `/orders/express-checkout` | Optional | Ununuzi bila akaunti, unafuatiliwa kwa msimbo wa agizo |
 | GET | `/orders` | JWT | Maagizo yako |
 | GET | `/orders/vendor` | vendor+ | Maagizo yenye bidhaa zako |
-| GET | `/orders/:id` | JWT | Agizo moja |
-| PUT | `/orders/:id/status` | vendor+ | Sasisha hali |
-| PUT | `/orders/:id/verify-recipient` | JWT | Mteja anathibitisha kupokea |
-| PUT | `/orders/:id/cancel` | JWT | Ghairi (inarudisha stock) |
+| GET | `/orders/:id` | JWT | Agizo moja (mmiliki, mshirika wa usafirishaji au muuzaji) |
+| GET | `/orders/track/:orderCode` | Public | Fuata agizo la mgeni kwa msimbo wa rejea |
+| POST | `/orders/:orderCode/pay` | Public | Anzisha malipo ya agizo la mgeni kwa msimbo wa rejea |
+| POST | `/orders/:orderCode/cancel` | Public | Ghairi agizo la mgeni kwa msimbo wa rejea (ulinzi wa simu wa hiari) |
+| PUT | `/orders/:id/status` | vendor+ | Sasisha hali (`suborderId` ya hiari) |
+| PUT | `/orders/:id/verify-recipient` | JWT | Mteja anathibitisha kupokea (`suborderId` ya hiari) |
+| POST | `/orders/verify-qr` | delivery/vendor/admin | Thibitisha suborder kupitia payload yake ya QR |
+| PUT | `/orders/:id/deliver` | delivery/vendor+ | Weka alama ya kukabidhiwa, rekodi `collectedAmount` (`suborderId` ya hiari) |
+| PUT | `/orders/:id/negotiate` | vendor+ | Weka `negotiatedAmount` kwa suborder |
+| PUT | `/orders/:id/cancel` | JWT | Ghairi (pending/confirmed pekee, inarekodi `cancelReason`) |
 | GET | `/orders/sales-report` | vendor | Ripoti ya mauzo ya kipindi |
+
+### Suborders
+
+Checkout inagawanya agizo kuwa **suborder moja kwa kila biashara ya muuzaji** (angalia [data model](./data-model)). Kila suborder ina `status` na `recipientCode` yake. Mutations zinazofanya kazi kwenye sehemu ya muuzaji mmoja zinakubali `suborderId` ya hiari ili backend ilenge suborder sahihi badala ya agizo lote:
+
+- `PUT /orders/:id/status` → body `{ "status": "confirmed", "suborderId": "..." }`
+- `PUT /orders/:id/verify-recipient` → body `{ "recipientId": "<recipientCode>", "suborderId": "..." }`
+- `POST /orders/verify-qr` → body `{ "orderId": "...", "suborderId": "...", "recipientId": "<recipientCode>" }`
+- `PUT /orders/:id/deliver` → body `{ "recipientId": "<recipientCode>", "suborderId": "...", "collectedAmount": 15000 }`
+- `PUT /orders/:id/negotiate` → body `{ "negotiatedAmount": 14000, "suborderId": "..." }`
+- `POST /delivery/assign` → body `{ "orderId": "...", "deliveryPersonId": "...", "suborderId": "..." }`
+- `PUT /delivery/:id/verify` → body `{ "recipientId": "<recipientCode>", "suborderId": "..." }`
+
+**Payload ya QR ya usafirishaji** inasimbua suborder kama `{ v:1, o:<suborderId>, r:<recipientCode>, s:1 }` — wateja wanaoakti ni kama msimbo wa QR na endpoints za uthibitisho zinarejesha `o`/`r` kuwa `suborderId` + `recipientId`.
 
 ### Body ya malipo ya agizo
 
 ```json
 {
-  "addressId": "...",
-  "deliveryZoneId": "...",
-  "paymentMethodId": "..."
+  "hasDelivery": true,
+  "deliveryAddress": "Kijitonyama, Dar es Salaam",
+  "deliveryLat": -6.79,
+  "deliveryLng": 39.22,
+  "deliveries": [
+    { "businessId": "...", "hasDelivery": true, "deliveryLocation": "Mikocheni" }
+  ]
 }
 ```
 
+`deliveries` ni safu ya hiari ya kila biashara inayobadilisha usafirishaji kwa kila suborder. `deliveryLocation` lazima iwe kwenye zones za usafirishaji za biashara; vinginevyo `deliveryFee` ya jumla ya biashara inatumika.
+
+### Malipo kwa wakati wa kukabidhi (Cash on Delivery)
+
+Wakati kipengele cha `payment_service` kikiwa **kimezimwa**, malipo ya mtandaoni yamezimwa lakini kuweka maagizo na checkout zinaendelea kufanya kazi. Checkout inajibu kwa:
+
+```json
+{
+  "message": "Order placed successfully",
+  "order": { ... },
+  "requiresPayment": false,
+  "escrowCreated": true
+}
+```
+
+- `requiresPayment: false` → hakuna malipo ya gateway yanayotarajiwa; agizo linawekwa kama **Cash on Delivery** na mshirika wa usafirishaji hukusanya wakati wa kukabidhi.
+- `escrowCreated` → rekodi ya escrow bado inaundwa (kwa default), kwa hiyo fedha zinazokusanywa wakati wa kukabidhi huhifadhiwa na kutolewa kwa kila suborder inapothibitishwa.
+- Wakati `payment_service` ikiwa **washa**, `requiresPayment: true` na malipo ya gateway (ClickPesa) yanaanzishwa badala yake.
+- `POST /orders/:orderCode/pay` inarudisha `{ "requiresPayment": false }` pamoja na taarifa ya COD wakati `payment_service` ikiwa imezimwa.
+
 ### Hali za agizo
 
-`pending` → `confirmed` → `shipped` → `delivered` | `cancelled` | `returned`
+`pending` → `confirmed` → `shipped` → `delivered` | `cancelled`
+
+- Kuthibitisha suborder kunatengeneza `recipientCode` yake (inayotumika kwa uthibitishaji wa usafirishaji wa pande tatu na payload ya QR).
+- Kukabidhi suborder kunarekodi `collectedAmount` (kwa default `negotiatedAmount ?? subtotal`), inatoa sehemu ya escrow ya suborder hiyo na kumkabidhi biashara.
+- Kughairi (mteja au mgeni) kinaruhusiwa tu wakati agizo liko `pending`/`confirmed`; linaweka `cancelReason` kwenye agizo na suborders na kurudisha escrow.
+- `returned` inakubaliwa tu kupitia njia ya admin (`PUT /admin/orders/:orderId/status`).
 
 <Callout type="note">
-Kuthibitisha agizo kunatengeneza **ID ya mpokeaji** inayotumika kwa uthibitishaji wa usafirishaji wa njia tatu.
+Maagizo ya wauzaji wengi yanatengeneza **msimbo mmoja wa mpokeaji kwa kila suborder**, unaothibitishwa dhidi ya sehemu ya biashara inayofanana. Safu za `OrderItem` zina nakala za lahaja (`variantId`, `variantName`, `variantType`) pamoja na `selectedSpecs`/`notes`.
 </Callout>
 
 ## Kuhifadhi nafasi (`/api/bookings`)
@@ -58,8 +110,9 @@ Kuthibitisha agizo kunatengeneza **ID ya mpokeaji** inayotumika kwa uthibitishaj
 | POST | `/bookings` | client | Hifadhi nafasi ya huduma |
 | GET | `/bookings/my` | client | Nafasi zako |
 | GET | `/bookings/vendor` | service_provider | Nafasi za mtoa huduma |
-| PUT | `/bookings/:id/status` | service_provider | Sasisha hali |
-| POST | `/bookings/verify-qr` | delivery+ | Thibitisha QR ya kuhifadhi nafasi |
+| PUT | `/bookings/:id/accept` | service_provider | Kubali + tengeneza msimbo wa kuhifadhi nafasi |
+| PUT | `/bookings/:id/reject` | service_provider | Kataa |
+| POST | `/bookings/verify-qr` | service_provider/admin | Thibitisha QR ya kuhifadhi nafasi |
 
 ## Usafirishaji (`/api/delivery`)
 
@@ -67,9 +120,10 @@ Kuthibitisha agizo kunatengeneza **ID ya mpokeaji** inayotumika kwa uthibitishaj
 |--------|------|------|-------------|
 | POST | `/delivery/create` | vendor+ | Unda mshirika wa usafirishaji |
 | GET | `/delivery/my-team` | vendor+ | Orodhesha timu |
-| POST | `/delivery/assign` | vendor+ | Kabidhi kwenye agizo (→ shipped) |
+| POST | `/delivery/assign` | vendor+ | Kabidhi suborder (→ shipped) |
 | GET | `/delivery/my-deliveries` | delivery | Usafirishaji uliokabidhiwa |
-| PUT | `/delivery/:orderId/verify` | delivery | Thibitisha kukabidhiwa |
+| GET | `/delivery/my-stats` | delivery | Takwimu za usafirishaji |
+| PUT | `/delivery/:id/verify` | delivery | Thibitisha kukabidhiwa (`suborderId` ya hiari) |
 | PUT | `/delivery/my-status` | delivery | Badilisha hali ya Active/offline |
 | GET | `/delivery/calculate` | Public | Ada ya usafirishaji kwa eneo |
 | GET | `/delivery/zones/public` | Public | Zones za usafirishaji za biashara |

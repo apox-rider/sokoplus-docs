@@ -1,0 +1,145 @@
+---
+title: Subscriptions
+description: Reference for /api/subscriptions — plan tiers, pricing, upgrades, downgrades and vendor listing limits.
+group: api
+order: 9
+updated: 2026-08-07
+---
+
+Vendor and service-provider accounts hold a subscription with a plan tier that sets listing limits and feature entitlements.
+
+## Plan tiers & pricing
+
+Tiers are `free`, `pro`, `business` and `enterprise`. Prices are in **TZS per month** and differ by account type.
+
+| Tier | Vendor / month | Service provider / month | Max products | Max services |
+|------|----------------|--------------------------|--------------|--------------|
+| `free` | 0 | 0 | 10 | 3 |
+| `pro` | 25,000 | 20,000 | 50 | 15 |
+| `business` | 75,000 | 60,000 | 200 | 50 |
+| `enterprise` | 150,000 | 120,000 | Unlimited | Unlimited |
+
+A subscription stores `tier`, `price`, `startDate`, `endDate`, `isActive`, `isTrial`, `paymentMethod`, `autoRenew` and `autoDowngrade`. When no active subscription exists the account effectively runs on `free`.
+
+## Endpoints
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/subscriptions/my` | JWT | Current subscription, limits and prices |
+| POST | `/subscriptions/subscribe` | vendor/service_provider | Start a paid tier |
+| POST | `/subscriptions/cancel` | vendor/service_provider | Cancel the current subscription |
+| POST | `/subscriptions/upgrade` | vendor/service_provider | Move to a higher tier |
+| POST | `/subscriptions/downgrade` | vendor/service_provider | Schedule a downgrade to a lower tier |
+| GET | `/subscriptions/vendor/:vendorId/limits` | JWT | Listing limits for a vendor |
+| GET | `/subscriptions/all` | superAdmin | List all subscriptions |
+
+## GET /subscriptions/my
+
+Returns the current subscription (or the default `free` shape), the tier's limits, the user's current product/service count and the applicable price list.
+
+<CodeBlock title="Response">
+```json
+{
+  "subscription": {
+    "id": "...",
+    "userId": "...",
+    "type": "vendor",
+    "tier": "pro",
+    "price": 25000,
+    "startDate": "2026-07-01T00:00:00.000Z",
+    "endDate": "2026-08-01T00:00:00.000Z",
+    "isActive": true,
+    "isTrial": false,
+    "paymentMethod": "manual"
+  },
+  "limits": { "products": 50, "services": 15 },
+  "currentCount": 12,
+  "prices": {
+    "free": 0,
+    "pro": 25000,
+    "business": 75000,
+    "enterprise": 150000
+  }
+}
+```
+</CodeBlock>
+
+## POST /subscriptions/subscribe
+
+Starts a paid subscription for the authenticated account. Body:
+
+```json
+{ "tier": "pro", "paymentMethod": "clickpesa" }
+```
+
+`tier` is required and must be one of `free`, `pro`, `business`, `enterprise`; `paymentMethod` defaults to `manual` when omitted. Returns `201` with the created subscription. Subscribing to the tier you already hold returns `400`.
+
+<Callout type="warning">
+`subscribe` and `upgrade` are gated by `paymentEnabled('subscription')`. When the **payment service (ClickPesa) is switched off** or subscription payments are paused, these endpoints return **503** and no subscription is created.
+</Callout>
+
+## POST /subscriptions/upgrade
+
+Move to a higher-priced tier. Same body as `subscribe` (`tier`, optional `paymentMethod`). Returns `400` with `Use downgradeTier for tier downgrades` when the target tier is not strictly more expensive. The previous subscription is deactivated and a new one is created at the full new-tier price.
+
+## POST /subscriptions/downgrade
+
+Schedule a move to a cheaper tier. Same body as `subscribe`. Returns `400` with `Use upgradeTier for tier upgrades` when the target tier is not strictly cheaper. The downgraded subscription is created with `isActive: false` and `autoDowngrade: true` and takes effect at the current subscription's `endDate`.
+
+<CodeBlock title="Response">
+```json
+{
+  "message": "Downgrade to free scheduled for 2026-08-01T00:00:00.000Z",
+  "subscription": {
+    "tier": "free",
+    "price": 0,
+    "isActive": false,
+    "autoDowngrade": true,
+    "startDate": "2026-08-01T00:00:00.000Z"
+  }
+}
+```
+</CodeBlock>
+
+## POST /subscriptions/cancel
+
+Deactivates the active subscription immediately. Returns `404` when there is no active subscription.
+
+## GET /subscriptions/vendor/:vendorId/limits
+
+Returns the subscription limits for a vendor's business profile (`vendorId` is the business profile id). Includes the tier, the `products`/`services` caps, the current product count and `canAddMore`.
+
+<CodeBlock title="Response">
+```json
+{
+  "tier": "business",
+  "limits": { "products": 200, "services": 50 },
+  "currentCount": 47,
+  "canAddMore": true
+}
+```
+</CodeBlock>
+
+Returns `404` when the vendor is not found.
+
+## GET /subscriptions/all
+
+superAdmin only. Lists every subscription, newest first, with the owning user's `id`, `fullName` and `email`. Filter with query params `type` (`vendor`|`service_provider`), `tier` and `isActive` (`true`|`false`).
+
+<CodeBlock title="Response">
+```json
+{
+  "subscriptions": [
+    {
+      "id": "...",
+      "type": "vendor",
+      "tier": "pro",
+      "price": 25000,
+      "isActive": true,
+      "user": { "id": "...", "fullName": "Jane Doe", "email": "jane@example.com" }
+    }
+  ],
+  "total": 1
+}
+```
+</CodeBlock>

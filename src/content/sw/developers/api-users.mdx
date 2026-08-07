@@ -1,58 +1,136 @@
 ---
 title: Watumiaji
-description: Rejea ya /api/users na /api/business — wasifu, anwani na usimamizi wa biashara.
+description: Rejea ya /api/user na /api/business — wasifu, anwani na usimamizi wa biashara.
 group: api
 order: 3
-updated: 2026-08-03
+updated: 2026-08-07
 ---
 
-Endpoints za watumiaji na biashara zinasimamia wasifu na rekodi za biashara za muuzaji/mtoa huduma.
+Endpoints za watumiaji na biashara zinasimamia wasifu na rekodi za biashara za muuzaji/mtoa huduma. Endpoints zote za watumiaji hapa chini zinahitaji JWT.
 
-## GET /users/me
+## GET /user/profile
 
 Wasifu wa mtumiaji wa sasa. **Uthibitishaji unahitajika.**
 
+Inarudisha kitu cha mtumiaji kama **JSON bapa** (hakijafungwa katika `{status, data}`) ikijumuisha `businessProfile` na anwani ya msingi.
+
+<CodeBlock title="Jibu (Response)">
 ```json
 {
-  "status": "success",
-  "data": {
-    "id": "...",
-    "fullName": "Jane Doe",
-    "email": "you@example.com",
-    "role": "vendor",
-    "phoneNumber": "+255700000000",
-    "businessProfile": { "businessName": "Jane's Shop", "status": "APPROVED" },
-    "defaultAddress": { ... }
-  }
+  "id": "...",
+  "fullName": "Jane Doe",
+  "email": "you@example.com",
+  "role": "vendor",
+  "phoneNumber": "+255700000000",
+  "avatarUrl": "...",
+  "businessProfile": { "businessName": "Jane's Shop", "status": "APPROVED" },
+  "addresses": [
+    { "id": "...", "label": "Home", "streetAddress": "...", "city": "...", "isDefault": true }
+  ]
 }
 ```
+</CodeBlock>
 
-## PUT /users/update
+## GET /auth/me
 
-Sasisha sehemu za jina, simu na anwani. Pia inasawazisha anwani ya msingi.
+Maelezo kamili ya "wewe ni nani". **Uthibitishaji unahitajika.** Huu ndio endpoint tajiri zaidi kuhusu mtumiaji wa sasa: unatatua `businessProfile` (ikijumuisha `university` na `region` yake), `university`, `region`, `majorAdminRegion` na `adminPermissions` za mtumiaji mwenyewe, na kuongeza `selfieVerification` na `firstName`.
 
-## PUT /users/avatar
+<CodeBlock title="Muundo wa jibu">
+```json
+{
+  "id": "...",
+  "fullName": "Jane Doe",
+  "role": "vendor",
+  "businessProfile": {
+    "businessName": "Jane's Shop",
+    "university": { "id": "...", "name": "..." },
+    "region": { "id": "...", "name": "..." }
+  },
+  "university": { "id": "...", "name": "..." },
+  "region": { "id": "...", "name": "..." },
+  "majorAdminRegion": { "region": { "id": "...", "name": "..." } },
+  "adminPermissions": [{ "permissionKey": "manage_orders", "enabled": true }],
+  "selfieVerification": { "status": "..." },
+  "firstName": "Jane"
+}
+```
+</CodeBlock>
 
-Pakia picha mpya ya avatar (multipart). Inarudisha `avatarUrl` iliyosasishwa.
+## PUT /user/update
 
-## PUT /users/password
+Sasisha sehemu za jina, simu na anwani. Pia inasawazisha anwani ya msingi: inaisasisha ikiwa tayari ipo, au inaunda moja yenye lebo `Home` wakati `streetAddress` na `city` zote zimetolewa.
 
+<CodeBlock title="Ombi (Request)">
+```json
+{
+  "fullName": "Jane Doe",
+  "phoneNumber": "+255700000000",
+  "streetAddress": "123 Sam Nujoma Road",
+  "district": "Kinondoni",
+  "ward": "Mikocheni",
+  "city": "Dar es Salaam"
+}
+```
+</CodeBlock>
+
+## PUT /user/avatar
+
+Pakia picha mpya ya avatar (multipart, jina la sehemu `avatar`). Inarudisha `avatarUrl` iliyosasishwa.
+
+## PUT /user/password
+
+<CodeBlock title="Ombi (Request)">
 ```json
 { "currentPassword": "old", "newPassword": "new" }
 ```
+</CodeBlock>
 
-## DELETE /users/account
+Inarudisha `401` na ujumbe `Invalid current password` ikiwa nenosiri la sasa si sahihi.
 
-Inafuta akaunti yako kwa upole.
+## Anwani (`/api/user/addresses`)
 
-## PUT /users/change-role
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| GET | `/user/addresses` | JWT | Orodhesha anwani zako (zilizofutwa kwa upole hazijumuishwi) |
+| POST | `/user/addresses` | JWT | Unda anwani (tazama ombi hapa chini) |
+| DELETE | `/user/addresses/:id` | JWT | Futa anwani kwa upole |
 
-Badilisha jukumu la mtumiaji wa sasa (linalodhibitiwa na msimamizi).
+<CodeBlock title="POST /user/addresses">
+```json
+{
+  "label": "Home",
+  "streetAddress": "123 Sam Nujoma Road",
+  "city": "Dar es Salaam",
+  "district": "Kinondoni",
+  "ward": "Mikocheni",
+  "isDefault": true
+}
+```
+</CodeBlock>
 
-## Kumbukumbu za shughuli
+Kuweka `isDefault: true` kunafuta `isDefault` kwenye anwani nyingine za mtumiaji.
 
-- `GET /users/activity-logs` — historia ya shughuli zako.
-- `GET /users/refer` — taarifa/kiungo cha referral.
+## Njia za malipo (`/api/user/payments`)
+
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| GET | `/user/payments` | JWT | Orodhesha njia za malipo zilizohifadhiwa |
+| POST | `/user/payments` | JWT | Hifadhi njia ya malipo |
+
+<CodeBlock title="POST /user/payments">
+```json
+{ "type": "mobile_money", "provider": "M-Pesa", "accountNumber": "+255700000000", "isDefault": true }
+```
+</CodeBlock>
+
+## DELETE /user/account
+
+Inafuta akaunti yako kwa upole: inaweka `deletedAt` huku ikihifadhi data katika rekodi. **Uthibitishaji unahitajika.**
+
+## Mabadiliko ya jukumu na kumbukumbu za shughuli
+
+- `PUT /users/change-role` na `GET /users/activity-logs` **hazipo**. Mabadiliko ya jukumu hufanywa na wasimamizi pekee kupitia `PUT /admin/users/:userId/role` (yanayolindwa na `partnerAdmin`/`majorAdmin`/`superAdmin` na kuwekewa mipaka ya mkoa). Kumbukumbu za shughuli ni za wasimamizi pekee kupitia `GET /admin/activity`.
+- Taarifa za rufaa zinapatikana kwenye [API ya rufaa](./api-referrals): `GET /referrals/my`, `GET /referrals/code` na `POST /referrals/apply`.
 
 ## Endpoints za biashara (`/api/business`)
 

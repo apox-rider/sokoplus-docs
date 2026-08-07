@@ -3,7 +3,7 @@ title: Orders, cart & bookings
 description: Reference for /api/orders, /api/cart and /api/bookings — checkout, fulfilment and delivery.
 group: api
 order: 6
-updated: 2026-08-03
+updated: 2026-08-07
 ---
 
 Orders, cart and bookings cover the purchasing flow.
@@ -18,37 +18,89 @@ Orders, cart and bookings cover the purchasing flow.
 | DELETE | `/cart/:id` | JWT | Remove item |
 | POST | `/cart/clear` | JWT | Clear cart |
 
-Adding to cart increments the product's `addToCartCount`.
+<Callout type="note">
+The `/api/cart` HTTP endpoints are currently **frozen** — the router is not mounted in `app.js` (cart is frontend-held). Authenticated checkout still reads items from the `CartItem` table. See the [data model](./data-model).
+</Callout>
 
 ## Orders (`/api/orders`)
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| POST | `/orders/checkout` | JWT | Create order from cart (payment intent) |
+| POST | `/orders/checkout` | JWT | Create order from cart (COD when `payment_service` is off) |
+| POST | `/orders/express-checkout` | Optional | Guest purchase without an account, tracked by order code |
 | GET | `/orders` | JWT | Your orders |
 | GET | `/orders/vendor` | vendor+ | Orders with your products |
-| GET | `/orders/:id` | JWT | Single order |
-| PUT | `/orders/:id/status` | vendor+ | Update status |
-| PUT | `/orders/:id/verify-recipient` | JWT | Client confirms receipt |
-| PUT | `/orders/:id/cancel` | JWT | Cancel (restores stock) |
+| GET | `/orders/:id` | JWT | Single order (owner, delivery person or vendor) |
+| GET | `/orders/track/:orderCode` | Public | Track a guest/express order by reference code |
+| POST | `/orders/:orderCode/pay` | Public | Initiate payment for a guest order by reference code |
+| POST | `/orders/:orderCode/cancel` | Public | Cancel a guest order by reference code (optional phone guard) |
+| PUT | `/orders/:id/status` | vendor+ | Update status (optional `suborderId`) |
+| PUT | `/orders/:id/verify-recipient` | JWT | Client confirms receipt (optional `suborderId`) |
+| POST | `/orders/verify-qr` | delivery/vendor/admin | Verify a suborder via its QR payload |
+| PUT | `/orders/:id/deliver` | delivery/vendor+ | Mark delivered, record `collectedAmount` (optional `suborderId`) |
+| PUT | `/orders/:id/negotiate` | vendor+ | Set `negotiatedAmount` for a suborder |
+| PUT | `/orders/:id/cancel` | JWT | Cancel (pending/confirmed only, records `cancelReason`) |
 | GET | `/orders/sales-report` | vendor | Period sales report |
+
+### Suborders
+
+Checkout splits the order into one **suborder per vendor business** (see [data model](./data-model)). Each suborder has its own `status` and `recipientCode`. Mutations that act on one vendor's share accept an optional `suborderId` so the backend targets the correct suborder instead of the whole order:
+
+- `PUT /orders/:id/status` → body `{ "status": "confirmed", "suborderId": "..." }`
+- `PUT /orders/:id/verify-recipient` → body `{ "recipientId": "<recipientCode>", "suborderId": "..." }`
+- `POST /orders/verify-qr` → body `{ "orderId": "...", "suborderId": "...", "recipientId": "<recipientCode>" }`
+- `PUT /orders/:id/deliver` → body `{ "recipientId": "<recipientCode>", "suborderId": "...", "collectedAmount": 15000 }`
+- `PUT /orders/:id/negotiate` → body `{ "negotiatedAmount": 14000, "suborderId": "..." }`
+- `POST /delivery/assign` → body `{ "orderId": "...", "deliveryPersonId": "...", "suborderId": "..." }`
+- `PUT /delivery/:id/verify` → body `{ "recipientId": "<recipientCode>", "suborderId": "..." }`
+
+The **delivery QR payload** encodes the suborder as `{ v:1, o:<suborderId>, r:<recipientCode>, s:1 }` — clients render it as a QR code and verification endpoints resolve `o`/`r` back to `suborderId` + `recipientId`.
 
 ### Checkout body
 
 ```json
 {
-  "addressId": "...",
-  "deliveryZoneId": "...",
-  "paymentMethodId": "..."
+  "hasDelivery": true,
+  "deliveryAddress": "Kijitonyama, Dar es Salaam",
+  "deliveryLat": -6.79,
+  "deliveryLng": 39.22,
+  "deliveries": [
+    { "businessId": "...", "hasDelivery": true, "deliveryLocation": "Mikocheni" }
+  ]
 }
 ```
 
+`deliveries` is an optional per-business array that overrides delivery per suborder. A `deliveryLocation` must be served by the business's delivery zones; otherwise the business's flat `deliveryFee` applies.
+
+### Cash on Delivery
+
+When the `payment_service` feature is **off**, online payments are disabled but ordering and checkout keep working. Checkout responds with:
+
+```json
+{
+  "message": "Order placed successfully",
+  "order": { ... },
+  "requiresPayment": false,
+  "escrowCreated": true
+}
+```
+
+- `requiresPayment: false` → no gateway payment is expected; the order is placed as **Cash on Delivery** and the delivery agent collects on handover.
+- `escrowCreated` → the escrow record is still created (default), so funds collected at delivery are held and released per suborder when verified.
+- When `payment_service` is **on**, `requiresPayment: true` and the gateway payment (ClickPesa) is initiated instead.
+- `POST /orders/:orderCode/pay` returns `{ "requiresPayment": false }` with a COD notice when `payment_service` is off.
+
 ### Order statuses
 
-`pending` → `confirmed` → `shipped` → `delivered` | `cancelled` | `returned`
+`pending` → `confirmed` → `shipped` → `delivered` | `cancelled`
+
+- Confirming a suborder generates its `recipientCode` (used for the 3-way delivery verification and the QR payload).
+- Delivering a suborder records `collectedAmount` (defaults to `negotiatedAmount ?? subtotal`), releases that suborder's escrow share and credits the business.
+- Cancelling (customer or guest) is only allowed while `pending`/`confirmed`; it sets `cancelReason` on the order and suborders and refunds escrow.
+- `returned` is accepted only via the admin route (`PUT /admin/orders/:orderId/status`).
 
 <Callout type="note">
-Confirming an order generates a **recipient ID** used for the 3-way delivery verification.
+Multi-vendor orders generate one **recipient code per suborder**, verified against the matching business's share. `OrderItem` rows carry variant snapshots (`variantId`, `variantName`, `variantType`) plus `selectedSpecs`/`notes`.
 </Callout>
 
 ## Bookings (`/api/bookings`)
@@ -58,8 +110,9 @@ Confirming an order generates a **recipient ID** used for the 3-way delivery ver
 | POST | `/bookings` | client | Book a service |
 | GET | `/bookings/my` | client | Your bookings |
 | GET | `/bookings/vendor` | service_provider | Provider's bookings |
-| PUT | `/bookings/:id/status` | service_provider | Update status |
-| POST | `/bookings/verify-qr` | delivery+ | Verify a booking QR |
+| PUT | `/bookings/:id/accept` | service_provider | Accept + generate booking code |
+| PUT | `/bookings/:id/reject` | service_provider | Reject |
+| POST | `/bookings/verify-qr` | service_provider/admin | Verify a booking QR |
 
 ## Delivery (`/api/delivery`)
 
@@ -67,9 +120,10 @@ Confirming an order generates a **recipient ID** used for the 3-way delivery ver
 |--------|------|------|-------------|
 | POST | `/delivery/create` | vendor+ | Create delivery person |
 | GET | `/delivery/my-team` | vendor+ | List team |
-| POST | `/delivery/assign` | vendor+ | Assign to order (→ shipped) |
+| POST | `/delivery/assign` | vendor+ | Assign a suborder (→ shipped) |
 | GET | `/delivery/my-deliveries` | delivery | Assigned deliveries |
-| PUT | `/delivery/:orderId/verify` | delivery | Verify handover |
+| GET | `/delivery/my-stats` | delivery | Delivery stats |
+| PUT | `/delivery/:id/verify` | delivery | Verify handover (optional `suborderId`) |
 | PUT | `/delivery/my-status` | delivery | Active/offline toggle |
 | GET | `/delivery/calculate` | Public | Delivery fee for location |
 | GET | `/delivery/zones/public` | Public | Business delivery zones |

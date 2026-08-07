@@ -1,0 +1,145 @@
+---
+title: Usajili
+description: Rejea ya /api/subscriptions — viwango vya mipango, bei, kupandisha, kushusha na mipaka ya kuorodhesha ya muuzaji.
+group: api
+order: 9
+updated: 2026-08-07
+---
+
+Akaunti za wauzaji na watoa huduma zina usajili wenye kiwango (tier) kinachoweka mipaka ya kuorodhesha na haki za kutumia vipengele.
+
+## Viwango vya mipango na bei
+
+Viwango ni `free`, `pro`, `business` na `enterprise`. Bei ziko kwa **TZS kwa mwezi** na hutofautiana kwa aina ya akaunti.
+
+| Kiwango | Muuzaji / mwezi | Mtoa huduma / mwezi | Upeo wa bidhaa | Upeo wa huduma |
+|------|----------------|--------------------------|--------------|--------------|
+| `free` | 0 | 0 | 10 | 3 |
+| `pro` | 25,000 | 20,000 | 50 | 15 |
+| `business` | 75,000 | 60,000 | 200 | 50 |
+| `enterprise` | 150,000 | 120,000 | Bila kikomo | Bila kikomo |
+
+Usajili huhifadhi `tier`, `price`, `startDate`, `endDate`, `isActive`, `isTrial`, `paymentMethod`, `autoRenew` na `autoDowngrade`. Akaunti isiyokuwa na usajili unaoendelea hutumika kama `free`.
+
+## Endpoints
+
+| Method | Path | Uthibitishaji | Maelezo |
+|--------|------|------|-------------|
+| GET | `/subscriptions/my` | JWT | Usajili wa sasa, mipaka na bei |
+| POST | `/subscriptions/subscribe` | vendor/service_provider | Anza kiwango cha kulipia |
+| POST | `/subscriptions/cancel` | vendor/service_provider | Ghairi usajili wa sasa |
+| POST | `/subscriptions/upgrade` | vendor/service_provider | Pandisha hadi kiwango cha juu |
+| POST | `/subscriptions/downgrade` | vendor/service_provider | Ratibu kushusha hadi kiwango cha chini |
+| GET | `/subscriptions/vendor/:vendorId/limits` | JWT | Mipaka ya kuorodhesha ya muuzaji |
+| GET | `/subscriptions/all` | superAdmin | Orodhesha usajili wote |
+
+## GET /subscriptions/my
+
+Inarudisha usajili wa sasa (au muundo wa `free` ulio wa chaguo-msingi), mipaka ya kiwango, idadi ya sasa ya bidhaa/huduma za mtumiaji na orodha ya bei inayotumika.
+
+<CodeBlock title="Jibu">
+```json
+{
+  "subscription": {
+    "id": "...",
+    "userId": "...",
+    "type": "vendor",
+    "tier": "pro",
+    "price": 25000,
+    "startDate": "2026-07-01T00:00:00.000Z",
+    "endDate": "2026-08-01T00:00:00.000Z",
+    "isActive": true,
+    "isTrial": false,
+    "paymentMethod": "manual"
+  },
+  "limits": { "products": 50, "services": 15 },
+  "currentCount": 12,
+  "prices": {
+    "free": 0,
+    "pro": 25000,
+    "business": 75000,
+    "enterprise": 150000
+  }
+}
+```
+</CodeBlock>
+
+## POST /subscriptions/subscribe
+
+Huanzisha usajili wa kulipia kwa akaunti iliyothibitishwa. Body:
+
+```json
+{ "tier": "pro", "paymentMethod": "clickpesa" }
+```
+
+`tier` inahitajika na lazima iwe mojawapo ya `free`, `pro`, `business`, `enterprise`; `paymentMethod` ni `manual` kwa chaguo-msingi ikiachwa wazi. Inarudisha `201` pamoja na usajili ulioundwa. Kusajili kiwango tayari unachonacho kinarudisha `400`.
+
+<Callout type="warning">
+`subscribe` na `upgrade` zinalindwa na `paymentEnabled('subscription')`. Wakati **huduma ya malipo (ClickPesa) imezimwa** au malipo ya usajili yamesimamishwa, endpoints hizi hurudisha **503** na hakuna usajili unaoundwa.
+</Callout>
+
+## POST /subscriptions/upgrade
+
+Pandisha hadi kiwango chenye bei ya juu. Body sawa na `subscribe` (`tier`, na `paymentMethod` ya hiari). Inarudisha `400` pamoja na `Use downgradeTier for tier downgrades` wakati kiwango lengwa si cha gharama zaidi kabisa. Usajili wa awali huzimwa na mwingine unaundwa kwa bei kamili ya kiwango kipya.
+
+## POST /subscriptions/downgrade
+
+Ratibu kuhamia kiwango cha bei ya chini. Body sawa na `subscribe`. Inarudisha `400` pamoja na `Use upgradeTier for tier upgrades` wakati kiwango lengwa si cha bei ya chini kabisa. Usajili ulioshushwa unaundwa ukiwa na `isActive: false` na `autoDowngrade: true` na unaanza kutumika kwenye `endDate` ya usajili wa sasa.
+
+<CodeBlock title="Jibu">
+```json
+{
+  "message": "Downgrade to free scheduled for 2026-08-01T00:00:00.000Z",
+  "subscription": {
+    "tier": "free",
+    "price": 0,
+    "isActive": false,
+    "autoDowngrade": true,
+    "startDate": "2026-08-01T00:00:00.000Z"
+  }
+}
+```
+</CodeBlock>
+
+## POST /subscriptions/cancel
+
+Inazima mara moja usajili unaoendelea. Inarudisha `404` wakati hakuna usajili unaoendelea.
+
+## GET /subscriptions/vendor/:vendorId/limits
+
+Inarudisha mipaka ya usajili ya wasifu wa biashara ya muuzaji (`vendorId` ni id ya wasifu wa biashara). Inajumuisha kiwango, mipaka ya `products`/`services`, idadi ya sasa ya bidhaa na `canAddMore`.
+
+<CodeBlock title="Jibu">
+```json
+{
+  "tier": "business",
+  "limits": { "products": 200, "services": 50 },
+  "currentCount": 47,
+  "canAddMore": true
+}
+```
+</CodeBlock>
+
+Inarudisha `404` wakati muuzaji hajapatikana.
+
+## GET /subscriptions/all
+
+superAdmin pekee. Inaorodhesha kila usajili, kutoka mpya hadi zamani, pamoja na `id`, `fullName` na `email` za mmiliki. Chuja kwa vigezo vya query `type` (`vendor`|`service_provider`), `tier` na `isActive` (`true`|`false`).
+
+<CodeBlock title="Jibu">
+```json
+{
+  "subscriptions": [
+    {
+      "id": "...",
+      "type": "vendor",
+      "tier": "pro",
+      "price": 25000,
+      "isActive": true,
+      "user": { "id": "...", "fullName": "Jane Doe", "email": "jane@example.com" }
+    }
+  ],
+  "total": 1
+}
+```
+</CodeBlock>
