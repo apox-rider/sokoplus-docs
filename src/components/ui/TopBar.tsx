@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { GitBranch, LogOut, Menu, ShieldCheck, X } from 'lucide-react'
@@ -19,6 +19,13 @@ export function TopBar({ lang }: { lang: Lang }) {
   const session = useDocsSession()
   const navigate = useNavigate()
 
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : ''
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [open])
+
   async function handleLogout() {
     try {
       await docsApi.logout()
@@ -33,8 +40,16 @@ export function TopBar({ lang }: { lang: Lang }) {
   const links = [
     { to: `/${lang}`, label: t('home'), end: true },
     { to: `/${lang}/help`, label: t('helpCentre'), end: false },
-    // { to: `/${lang}/developers`, label: t('developers'), end: false }, // developers section under development
+    { to: `/${lang}/developers`, label: t('developers'), end: false },
   ]
+
+  const linkClass = ({ isActive }: { isActive: boolean }) =>
+    cn(
+      'rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
+      isActive
+        ? 'bg-brand-soft text-brand'
+        : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface',
+    )
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur-md">
@@ -45,19 +60,7 @@ export function TopBar({ lang }: { lang: Lang }) {
 
         <nav className="ml-6 hidden items-center gap-1 md:flex" aria-label="Main">
           {links.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              end={l.end}
-              className={({ isActive }) =>
-                cn(
-                  'rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
-                  isActive
-                    ? 'bg-brand-soft text-brand'
-                    : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface',
-                )
-              }
-            >
+            <NavLink key={l.to} to={l.to} end={l.end} className={linkClass}>
               {l.label}
             </NavLink>
           ))}
@@ -126,14 +129,7 @@ export function TopBar({ lang }: { lang: Lang }) {
                 to={l.to}
                 end={l.end}
                 onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  cn(
-                    'rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors',
-                    isActive
-                      ? 'bg-brand-soft text-brand'
-                      : 'text-on-surface-variant hover:bg-surface-container',
-                  )
-                }
+                className={linkClass}
               >
                 {l.label}
               </NavLink>
