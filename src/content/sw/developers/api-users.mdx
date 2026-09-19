@@ -3,7 +3,7 @@ title: Watumiaji
 description: Rejea ya /api/user na /api/business — wasifu, anwani na usimamizi wa biashara.
 group: api
 order: 3
-updated: 2026-08-07
+updated: 2026-09-19
 ---
 
 Endpoints za watumiaji na biashara zinasimamia wasifu na rekodi za biashara za muuzaji/mtoa huduma. Endpoints zote za watumiaji hapa chini zinahitaji JWT.
@@ -142,6 +142,10 @@ Inafuta akaunti yako kwa upole: inaweka `deletedAt` huku ikihifadhi data katika 
 | PUT | `/business/logo` | vendor+ | Pakia nembo (logo) |
 | PUT | `/business/cover` | vendor+ | Pakia picha ya jalada (cover) |
 | GET | `/business/verification-status` | vendor+ | Hali ya idhini ya moja kwa moja |
+| POST | `/business/verify` | vendor+ | Wasilisha ombi la uthibitishaji wa biashara |
+| GET | `/business/balance` | vendor+ | Salio la sasa la mchuuzi (baada ya komisheni) |
+| POST | `/business/payout-request` | vendor+ | Omba malipo ya kutolewa (inahitaji swichi ya `payouts`) |
+| GET | `/business/payout-history` | vendor+ | Orodhesha ombi za awali za malipo |
 
 <Callout type="note">
 Hali ya biashara lazima iwe `APPROVED` kabla ya mmiliki kuweza kuorodhesha bidhaa au huduma.
