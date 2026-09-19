@@ -42,7 +42,7 @@ function A({ href, children, ...props }: AnchorHTMLAttributes<HTMLAnchorElement>
 
 function Table({ children, ...props }: ComponentProps<'table'>) {
   return (
-    <div className="my-4 overflow-x-auto rounded-lg border border-line">
+    <div className="doc-table-wrap">
       <table {...props} className="m-0 min-w-full">
         {children}
       </table>
