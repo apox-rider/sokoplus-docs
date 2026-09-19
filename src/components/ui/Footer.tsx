@@ -21,22 +21,15 @@ export function Footer({ lang }: { lang: Lang }) {
           <p className="mb-3 text-sm font-bold">{t('quickLinks')}</p>
           <ul className="space-y-2 text-sm text-on-surface-variant">
             <li>
-              <Link to={`/${lang}`} className="hover:text-brand">
+              <Link to={`/${lang}/help`} className="transition-colors hover:text-brand">
                 {t('helpCentre')}
               </Link>
             </li>
             <li>
-              <Link to={`/${lang}/help`} className="hover:text-brand">
-                {t('helpCentre')}
-              </Link>
-            </li>
-            {/* Developers link — hidden while under development
-            <li>
-              <Link to={`/${lang}/developers`} className="hover:text-brand">
+              <Link to={`/${lang}/developers`} className="transition-colors hover:text-brand">
                 {t('developers')}
               </Link>
             </li>
-            */}
           </ul>
         </div>
 
