@@ -1,0 +1,37 @@
+---
+title: Vyuo vikuu (universities)
+description: Rejea ya /api/universities — orodhesha vyuo vikuu na usimamizi wa rekodi za vyuo (CRUD ya admin).
+group: api
+order: 12
+updated: 2026-09-19
+---
+
+Vyuo vikuu vinahusishwa na mkoa na vinatumiwa na wasifu za watumiaji, uratibu wa usafirishaji na ununuzi wa sare, vifaa na huduma za wanafunzi.
+
+## Orodhesha vyuo vikuu
+
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| GET | `/universities` | — | Orodhesha vyuo vikuu vikiwemo vya mkoa; chuja kwa `?regionId=` |
+
+Majibu yanarudisha `{ id, name, code, city, regionId, region: { id, name } }` yakiwa yamepangwa kwa `name`. `?regionId=` huchuja kwenye mkoa mmoja. Vyuo vilivyofutwa kwa njia ya soft-delete havionekani.
+
+### Mfano wa ombi
+
+```
+GET /api/universities?regionId=reg_arta
+```
+
+## CRUD ya admin
+
+| Method | Path | Auth | Maelezo |
+|--------|------|------|-------------|
+| POST | `/universities` | `majorAdmin`, `superAdmin` | Unda chuo kikuu |
+| PUT | `/universities/:id` | `majorAdmin`, `superAdmin` | Sasisha chuo kikuu |
+| DELETE | `/universities/:id` | `majorAdmin`, `superAdmin` | Futa chuo kikuu kwa njia ya soft-delete |
+
+Zote tatu zimefungwa kwenye mkoa (region-scoped). `majorAdmin` anayetenda kwenye chuo kilicho nje ya mkoa wake waliopangiwa anapata `403`.
+
+<Callout type="note">
+`code` hutengenezwa kiotomatiki kutoka jina la chuo likiachiwa wazi na huhifadhiwa kwa herufi za herufi kubwa (uppercase). `majorAdmin` anaweza kusimamia vyuo vya mkoa wake pekee; `superAdmin` husimamia vyote.
+</Callout>
