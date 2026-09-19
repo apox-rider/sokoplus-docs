@@ -1,0 +1,37 @@
+---
+title: Universities
+description: Reference for /api/universities — list universities and manage university records (admin CRUD).
+group: api
+order: 12
+updated: 2026-09-19
+---
+
+Universities belong to a region and are referenced by user profiles, delivery coordination and (via the platform) procurement of uniforms, supplies and student services.
+
+## List universities
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/universities` | — | List universities with their region; optional `?regionId=` filter |
+
+Listings return `{ id, name, code, city, regionId, region: { id, name } }` ordered by `name`. `?regionId=` filters to a single region. Soft-deleted universities are excluded.
+
+### Query example
+
+```
+GET /api/universities?regionId=reg_arta
+```
+
+## Admin CRUD
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/universities` | `majorAdmin`, `superAdmin` | Create a university |
+| PUT | `/universities/:id` | `majorAdmin`, `superAdmin` | Update a university |
+| DELETE | `/universities/:id` | `majorAdmin`, `superAdmin` | Soft-delete a university |
+
+All three are **region-scoped**. A `majorAdmin` acting on a university outside their assigned region gets `403`.
+
+<Callout type="note">
+`code` is auto-generated from the university name when omitted and always stored uppercase. `majorAdmin` can only manage universities inside their own region; `superAdmin` manages all.
+</Callout>
