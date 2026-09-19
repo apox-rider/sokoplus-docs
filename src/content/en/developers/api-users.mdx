@@ -3,7 +3,7 @@ title: Users
 description: Reference for /api/user and /api/business — profiles, addresses, and business management.
 group: api
 order: 3
-updated: 2026-08-07
+updated: 2026-09-19
 ---
 
 User and business endpoints manage profiles and the vendor/provider business records. All user endpoints below require a JWT.
@@ -142,6 +142,10 @@ Soft-deletes your own account: sets `deletedAt` while preserving the data in rec
 | PUT | `/business/logo` | vendor+ | Upload logo |
 | PUT | `/business/cover` | vendor+ | Upload cover image |
 | GET | `/business/verification-status` | vendor+ | Live approval status |
+| POST | `/business/verify` | vendor+ | Submit a business verification request |
+| GET | `/business/balance` | vendor+ | Current vendor balance (net of commissions) |
+| POST | `/business/payout-request` | vendor+ | Request a payout (requires `payouts` feature gate) |
+| GET | `/business/payout-history` | vendor+ | List past payout requests |
 
 <Callout type="note">
 Business status must be `APPROVED` before the owner can list products or services.
