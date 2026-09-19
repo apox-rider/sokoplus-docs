@@ -23,6 +23,7 @@
   "stats": {
     "regions": "Regions covered",
     "languages": "Languages",
-    "openSource": "Open documentation"
+    "openSource": "Open documentation",
+    "guides": "Help guides"
   }
 }
