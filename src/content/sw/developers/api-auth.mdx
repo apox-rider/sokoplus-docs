@@ -3,7 +3,7 @@ title: Endpoints za uthibitishaji
 description: Rejea ya /api/auth — usajili, kuingia, OTP, kuweka upya nenosiri na wasifu.
 group: api
 order: 2
-updated: 2026-08-03
+updated: 2026-09-19
 ---
 
 Endpoints zote za uthibitishaji ziko chini ya `/api/auth`.
@@ -42,7 +42,7 @@ Kuingia kwa barua pepe + nenosiri. Inarudisha `data.token`.
 
 Inarudisha JWT wakati msimbo utakapothibitishwa.
 
-## POST /auth/me
+## GET /auth/me
 
 `GET` wasifu wa mtumiaji wa sasa ukijumuisha `businessProfile` na anwani ya msingi. **Uthibitishaji unahitajika.**
 
@@ -64,10 +64,14 @@ Inarudisha JWT wakati msimbo utakapothibitishwa.
 |--------|------|------|-------------|
 | POST | `/auth/otp/send` | — | Tuma OTP ya uthibitishaji |
 | POST | `/auth/otp/link` | JWT | Unganisha simu na akaunti |
-| POST | `/auth/logout` | JWT | Batilisha kipindi (session) |
-| POST | `/auth/refresh` | — | Fanya upya tokeni |
-| POST | `/auth/check-exists` | — | Angalia uwepo wa mtumiaji |
-| POST | `/auth/change-password` | JWT | Badilisha nenosiri |
+| POST | `/auth/otp/change-phone/send` | JWT | Tuma OTP ya kubadilisha nambari ya simu iliyounganishwa |
+| POST | `/auth/otp/change-phone/verify` | JWT | Thibitisha OTP na ubadili nambari ya simu iliyounganishwa |
+| POST | `/auth/google` | — | Ingia kwa kutumia tokeni ya Google ID |
+| POST | `/auth/check-exists` | — | Angalia kama barua pepe/simu tayari zipo |
+| POST | `/auth/logout` | JWT | Batilisha kipindi cha sasa (session) |
+| GET | `/auth/refresh` | — | Pata JWT mpya kwa kipindi sahili |
+
+Mabadiliko ya nenosiri yanahudumiwa nje ya `/api/auth`: `PUT /user/password` (nenosiri la sasa + nenosiri jipya).
 
 <Callout type="note">
 Endpoints fulani za pekee (kama kuingia kama mtumiaji mwingine) zimehifadhiwa kwa wasimamizi wa jukwaa na hazijatolewa hadharani.
