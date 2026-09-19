@@ -1,0 +1,43 @@
+---
+title: Search, discovery & recommendations
+description: Reference for /api/search, /api/explore, /api/recommendations and /api/showcase — search, suggestions, trending and curated product feeds.
+group: api
+order: 11
+updated: 2026-09-19
+---
+
+Search and discovery power the marketplace home page, search overlay and explore page.
+
+## Global search (`/api/search`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/search` | JWT + `use_global_search` permission | Full-text search across products, services and businesses |
+| GET | `/search/trending` | — | Trending search terms |
+| GET | `/search/suggestions` | — | Autocomplete suggestions for a partial query |
+
+`GET /search` requires the caller to hold the `use_global_search` permission (assigned to admins by default; assignable via `AdminPermission`).
+
+## Explore feed (`/api/explore`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/explore` | — | Aggregated discovery feed (categories, hot deals, new arrivals, top-rated, nearby) |
+
+`GET /explore` is gated by the `featured_products` feature flag.
+
+## Curated product feeds (`/api/recommendations`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/recommendations/new-arrivals` | — | Products created within 14 days, ranked by stock |
+| GET | `/recommendations/hot-deals` | — | Products with ≥15% discount, scored by orders × conversion × discount |
+| GET | `/recommendations/trending-up` | — | Products whose 72-hour order/cart velocity exceeds their lifetime baseline (threshold > 1.5) |
+
+All three feeds are gated by the `featured_products` feature flag and only surface products from `APPROVED` businesses.
+
+<Callout type="tip">
+The same curated classifications are also exposed under `/api/products` — see [Products](./api-products).
+</Callout>
+
+For media uploads (selfie / KYC documents) and showcase project management, see [Media uploads & showcase](./api-showcase).
