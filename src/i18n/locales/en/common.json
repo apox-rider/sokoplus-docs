@@ -16,5 +16,7 @@
   },
   "prev": "Previous",
   "next": "Next",
-  "updatedOn": "Updated"
+  "updatedOn": "Updated",
+  "readMore": "Read guide",
+  "home": "Home"
 }
