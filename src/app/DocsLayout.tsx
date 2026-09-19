@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Menu, X } from 'lucide-react'
@@ -11,6 +11,15 @@ export function DocsLayout({ section }: { section: Section }) {
   const lang: Lang = isLang(langParam) ? langParam : DEFAULT_LANG
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { t } = useTranslation(section === 'help' ? 'help' : 'developers')
+
+  useEffect(() => {
+    if (!sidebarOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [sidebarOpen])
 
   return (
     <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-8 md:flex-row md:gap-8 lg:px-8">
@@ -37,22 +46,24 @@ export function DocsLayout({ section }: { section: Section }) {
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="absolute inset-0 bg-black/40"
+            className="animate-fade-in absolute inset-0 bg-black/45 backdrop-blur-[2px]"
             onClick={() => setSidebarOpen(false)}
           />
-          <div className="absolute inset-y-0 left-0 w-80 max-w-[85vw] overflow-y-auto border-r border-line bg-surface p-5">
-            <div className="mb-4 flex items-center justify-between">
+          <div className="animate-slide-in-left absolute inset-y-0 left-0 flex w-80 max-w-[85vw] flex-col overflow-y-auto border-r border-line bg-surface shadow-2xl">
+            <div className="flex items-center justify-between border-b border-line px-5 py-4">
               <p className="font-bold">{t('title')}</p>
               <button
                 type="button"
                 onClick={() => setSidebarOpen(false)}
                 aria-label="Close menu"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line text-on-surface-variant"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line text-on-surface-variant transition-colors hover:border-brand hover:text-brand"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <Sidebar section={section} lang={lang} onNavigate={() => setSidebarOpen(false)} />
+            <div className="p-5">
+              <Sidebar section={section} lang={lang} onNavigate={() => setSidebarOpen(false)} />
+            </div>
           </div>
         </div>
       )}
