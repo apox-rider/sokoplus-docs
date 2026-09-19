@@ -1,0 +1,58 @@
+---
+title: Utafutaji, ugunduzi na mapendekezo
+description: Rejea ya /api/search, /api/explore, /api/showcase na /api/recommendations — utafutaji, mapendekezo na mipasho iliyochaguliwa.
+group: api
+order: 11
+updated: 2026-09-19
+---
+
+Utafutaji na ugunduzi hutumika kuendesha ukurasa wa nyumbani na ukurasa wa utafutaji.
+
+<Callout type="note">
+`/api/explore` na `/api/recommendations` zinahitaji swichi ya vipengele `featured_products`. Ikizimwa kwenye `/admin/ecommerce`, endpoints hizo hurudisha `503`.
+</Callout>
+
+## GET /search
+
+Global search across products, services, businesses and deliverables. Supports full-text matching, filters (category, price range, region, rating), sorting and pagination.
+
+Returns `{ results, suggestions, trending }`.
+
+## GET /search/trending
+
+Maswali ambayo yanaongezeka kasi sasa hivi — yanatumiwa na kisanduku cha utafutaji kwenye ukurasa wa nyumbani.
+
+## GET /search/suggestions?q=…
+
+Mapendekezo ya kukamilisha (autocomplete) kulingana na maandishi uliyochapa. `q` ni lazima.
+
+## GET /explore
+
+Kila kitu kwenye ukurasa wa "Explore": mipasho, bidhaa zinazopendwa, vibao vya faragha, bidhaa zinazopendwa hivi karibuni na categories kuu.
+
+Kwa media uploads (selfie / hati za KYC) na usimamizi wa miradi ya showcase, ona [Pakia media & showcase](./api-showcase).
+
+## GET /api/recommendations/…
+
+| Path | Maelezo |
+|------|---------|
+| `/trending-up` | Bidhaa zilizopanda kasi (velocity) katika saa 72 zilizopita dhidi ya rekodi yake ya kawaida; threshold > 1.5 |
+| `/new-arrivals` | Bidhaa zilizoundwa ndani ya siku 14, zilizopangwa kwa stock |
+| `/hot-deals` | Bidhaa zilizo na punguzo ≥ 15%, zilizopangwa kwa mchanganyiko wa maagizo × ubadilishaji × punguzo |
+
+<Callout type="note">
+`/recommendations/*` zote ziko nyuma ya `featured_products` flag na zinarudisha bidhaa kutoka kwa biashara zenye hali `APPROVED` pekee.
+</Callout>
+
+## Parameters & usaidizi
+
+| Param | Maelezo |
+|-------|---------|
+| `q` | Maswali ya utafutaji (inahitajika kwa `/search` na `/search/suggestions`) |
+| `page` / `limit` | Ukumbaji |
+| `sort` | `newest` \| `price_asc` \| `price_desc` \| `rating` \| `popularity` |
+| `filters` | Hifadhi ya `category, priceRange, region, rating, isVerified` |
+
+## ESL na ukumbaji
+
+Majibu yote ya utafutaji na ugunduzi yanatumia ukumbaji sawia. Angalia [viwango vya vivuli vya API](./api-conventions) kwa maelezo ya `page`, `limit`, `total` na mifuniko.
