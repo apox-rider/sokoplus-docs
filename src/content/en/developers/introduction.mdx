@@ -3,7 +3,7 @@ title: Introduction
 description: An overview of the SokoPlus platform API — what it is, the stack, and who it's for.
 group: overview
 order: 1
-updated: 2026-08-03
+updated: 2026-09-19
 ---
 
 This documentation covers the SokoPlus platform: its **public API**, the **data model**, and the **concepts** behind the marketplace. It's intended for developers building on top of SokoPlus or integrating their own systems.
@@ -33,8 +33,12 @@ Throughout these docs, the base URL is shown as `https://api.sokopluss.co.tz/api
 | **Authentication** | JWT, OTP, Google sign-in, roles & permissions |
 | **API reference** | Endpoint-by-endpoint documentation grouped by resource |
 | **Payments & webhooks** | ClickPesa, escrow, commissions, webhook signing |
-| **Platform concepts** | Data model, feature flags, notifications |
-| **Deployment** | Running the backend, environment variables |
+| **Platform concepts** | Data model, feature flags, notifications, rate limits |
+| **Deployment** | Running the backend & environment variables — **restricted**: only visible to authenticated platform admins |
+
+<Callout type="note">
+Four pages in the developer section (`api-admin`, `roles-permissions`, `deployment`, `environment-variables`) are restricted and served from the backend. You need a docs access token or a super-admin session to view them.
+</Callout>
 
 ## A word on stability
 
