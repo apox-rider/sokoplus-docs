@@ -57,6 +57,11 @@ export function MarkdownArticle({ content }: { content: string }) {
               {children}
             </a>
           ),
+          table: ({ children }) => (
+            <div className="doc-table-wrap">
+              <table>{children}</table>
+            </div>
+          ),
         }}
       >
         {content}
