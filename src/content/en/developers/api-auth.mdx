@@ -3,7 +3,7 @@ title: Auth endpoints
 description: Reference for /api/auth — registration, login, OTP, password reset and profile.
 group: api
 order: 2
-updated: 2026-08-03
+updated: 2026-09-19
 ---
 
 All auth endpoints live under `/api/auth`.
@@ -42,7 +42,7 @@ Email + password login. Returns `data.token`.
 
 Returns a JWT when the code is verified.
 
-## POST /auth/me
+## GET /auth/me
 
 `GET` current user profile including `businessProfile` and default address. **Auth required.**
 
@@ -64,10 +64,14 @@ Returns a JWT when the code is verified.
 |--------|------|------|-------------|
 | POST | `/auth/otp/send` | — | Send a verification OTP |
 | POST | `/auth/otp/link` | JWT | Link a phone to the account |
-| POST | `/auth/logout` | JWT | Invalidate session |
-| POST | `/auth/refresh` | — | Refresh token |
-| POST | `/auth/check-exists` | — | Check user existence |
-| POST | `/auth/change-password` | JWT | Change password |
+| POST | `/auth/otp/change-phone/send` | JWT | Send an OTP to change the linked phone |
+| POST | `/auth/otp/change-phone/verify` | JWT | Verify OTP and change the linked phone |
+| POST | `/auth/google` | — | Sign in with a Google ID token |
+| POST | `/auth/check-exists` | — | Check whether an email/phone already exists |
+| POST | `/auth/logout` | JWT | Invalidate the current session |
+| GET | `/auth/refresh` | — | Get a fresh JWT for a valid session |
+
+Password changes are handled outside `/api/auth`: `PUT /user/password` (current password + new password).
 
 <Callout type="note">
 Certain privileged endpoints (such as account impersonation) are reserved for platform administrators and are not documented publicly.
